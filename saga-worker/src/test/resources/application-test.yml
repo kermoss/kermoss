@@ -1,0 +1,42 @@
+# Application
+server:
+  port: 8081
+
+app:
+  host: http://localhost:${server.port}
+
+# Oracle settings
+spring.datasource:
+  url: jdbc:h2:mem:AZ
+  username: sa
+  password: 
+  driver-class-name: org.h2.Driver
+
+
+
+# Hibernate settings
+spring.jpa.show-sql: true
+spring.jpa.hibernate.ddl-auto: create-drop
+spring.jpa.properties.hibernate.dialect: org.hibernate.dialect.H2Dialect
+spring.jpa.properties.hibernate.hbm2ddl.auto: create-drop
+spring:
+  sleuth:
+    enabled: true
+  zipkin:
+    enabled: false
+
+# HikariCP settings
+# spring.datasource.hikari.*
+spring.datasource.hikari:
+  connection-timeout: 60000
+  maximum-pool-size: 5
+
+kermoss.serviceName: pizza-shop
+market-service: http://localhost:${server.port}/command-executor/commands
+shippement-service: http://localhost:${server.port}/command-executor/commands
+pizza-shop: http://localhost:${server.port}/command-executor/commands
+
+ribbon:
+  eureka:
+    enabled: false
+  listOfServers: localhost:${server.port}

@@ -1,0 +1,38 @@
+# Application
+server:
+  port: 8081
+
+app:
+  host: http://localhost:${server.port}
+
+# Oracle settings
+spring.datasource:
+  url: jdbc:oracle:thin:@localhost:49161:xe
+  username: system
+  password: oracle
+  driver-class-name: oracle.jdbc.driver.OracleDriver
+
+
+# Hibernate settings
+spring.jpa.show-sql: true
+spring.jpa.hibernate.ddl-auto: create
+spring.jpa.properties.hibernate.dialect: org.hibernate.dialect.Oracle10gDialect
+spring.jpa.properties.hibernate.hbm2ddl.auto: create
+
+# HikariCP settings
+# spring.datasource.hikari.*
+spring.datasource.hikari:
+  connection-timeout: 60000
+  maximum-pool-size: 5
+
+kermoss.serviceName: pizza-shop
+market-service: http://localhost:8081/command-executor/commands
+shippement-service: http://localhost:8081/command-executor/commands
+pizza-shop: http://localhost:8081/command-executor/commands
+
+logging.level.org.springframework.transaction: TRACE
+
+ribbon:
+  eureka:
+    enabled: false
+  listOfServers: localhost:8081
