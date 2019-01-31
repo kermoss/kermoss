@@ -11,6 +11,7 @@
   - [Solution: Kermoss Framework](#solution-kermoss-framework)
     - [Kermoss ToolBox:](#kermoss-toolbox)
   - [Terminologies:](#terminologies)
+- [Kermoss Architecture Big Picture :](#kermoss-architecture-big-picture)
 - [Role des composants](#role-des-composants)
   - [BusinessTransactionManager :](#businesstransactionmanager)
   - [CommandOrchestrator:](#commandorchestrator)
@@ -66,6 +67,10 @@ The (realm orchestrator) is the initiator of "global business transaction: GTX",
 - C.O (Command Orchestrator): Manages the life cycle of commands sent by an internal or external BFM
 - C.S (Command Scheduler): Manages the life cycle of the commands sent by the BFM
 - T.S (Transport Service): Defines routing & mediation rules
+
+# Kermoss Architecture Big Picture :
+
+![kermoss-architecture](images/kermoss-archi.svg)
 
 # Role des composants
 
