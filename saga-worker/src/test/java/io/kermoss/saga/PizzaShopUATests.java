@@ -105,12 +105,11 @@ public class PizzaShopUATests extends KermossIT {
 
        List<GlobalTransaction> gtxList = globalTransactionRepository.findAll();
 
-        GlobalTransaction firstGTX =  gtxList.get(0);
+        GlobalTransaction firstGTX =  gtxList.get(1);
 
-       GlobalTransaction secondGTX = gtxList.get(1);
+        GlobalTransaction secondGTX = gtxList.get(2);
 
-
-       assertEquals(secondGTX.getParent() , firstGTX.getId());
+      assertEquals(secondGTX.getParent() , firstGTX.getId());
 
        assertEquals(globalTransactionRepository.count() , 3);
 
@@ -158,7 +157,7 @@ public class PizzaShopUATests extends KermossIT {
         List<LocalTransaction> ltxList = globalTransactionRepository.findAll().stream().flatMap(
                 l -> l.getLocalTransactions().stream()).collect(Collectors.toList());
         List<GlobalTransaction> gtxList = globalTransactionRepository.findAll();
-        GlobalTransaction firstGTX = gtxList.get(0);
+        GlobalTransaction firstGTX = gtxList.get(1);
         assertTrue( ltxList.stream()
                 .filter( l -> !l.getName().equals("BoxDelivery"))
                 .allMatch( ll -> ll.getGlobalTransaction().getId().equals(firstGTX.getId())) );
