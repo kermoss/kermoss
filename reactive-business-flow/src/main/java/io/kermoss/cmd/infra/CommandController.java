@@ -5,7 +5,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import io.kermoss.cmd.app.CommandOrchestrator;
 import io.kermoss.cmd.domain.AbstractCommand;
@@ -14,26 +18,22 @@ import io.kermoss.cmd.domain.OutboundCommand;
 import io.kermoss.cmd.domain.TransporterCommand;
 import io.kermoss.cmd.domain.repository.CommandRepository;
 import io.kermoss.cmd.exception.CommandNotFoundException;
-import io.kermoss.trx.domain.repository.GlobalTransactionRepository;
-
-import java.util.List;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/command-executor")
 public class CommandController {
     private final CommandOrchestrator commandOrchestrator;
-    private final GlobalTransactionRepository globalTransactionRepository;
     private final CommandRepository commandRepository;
     private final Logger log = LoggerFactory.getLogger(CommandController.class);
+    private final CommandMapper commandMapper;
     @Autowired
     public CommandController(
+        final CommandMapper commandMapper,		
         final CommandOrchestrator commandOrchestrator,
-        final GlobalTransactionRepository globalTransactionRepository,
         final CommandRepository commandRepository
     ) {
+    	this.commandMapper=commandMapper; 
         this.commandOrchestrator = commandOrchestrator;
-        this.globalTransactionRepository = globalTransactionRepository;
         this.commandRepository = commandRepository;
     }
 
@@ -44,7 +44,7 @@ public class CommandController {
             return new ResponseEntity<>(HttpStatus.CONFLICT);
         }
 
-        this.commandOrchestrator.receive(this.transform(command));
+        this.commandOrchestrator.receive(commandMapper.transform(command));
 
         return new ResponseEntity<>(
                 HttpStatus.ACCEPTED
@@ -65,27 +65,13 @@ public class CommandController {
 
     @PostMapping("/commands/prepare")
     public ResponseEntity<?> prepareCommand(@RequestBody final TransporterCommand command) {
-        this.commandOrchestrator.prepare(this.transform(command));
+        this.commandOrchestrator.prepare(commandMapper.transform(command));
         return new ResponseEntity<>(
                 HttpStatus.ACCEPTED
         );
     }
 
-    private InboundCommand transform(TransporterCommand outcmd){
-    	
-        return InboundCommand.builder()
-                .source(outcmd.getSource())
-                .subject(outcmd.getSubject())
-                .destination(outcmd.getDestination())
-                .payload(outcmd.getPayload())
-                .PGTX(outcmd.getParentGTX())
-                .gTX(outcmd.getChildofGTX())
-                .fLTX(outcmd.getFLTX())
-                .additionalHeaders(outcmd.getAdditionalHeaders())
-                .refId(outcmd.getRefId())
-                .trace(outcmd.getTraceId())
-                .build();
-    }
+    
 
 
 }

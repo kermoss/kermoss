@@ -24,8 +24,10 @@ public class CommandControllerTest {
 
     @Mock
     private CommandOrchestrator mockCommandOrchestrator;
+    
     @Mock
-    private GlobalTransactionRepository mockGlobalTransactionRepository;
+    private CommandMapper commandMapper;
+    
     @Mock
     private CommandRepository mockCommandRepository;
 
@@ -34,7 +36,7 @@ public class CommandControllerTest {
     @Before
     public void setUp() {
         initMocks(this);
-        commandControllerUnderTest = new CommandController(mockCommandOrchestrator, mockGlobalTransactionRepository, mockCommandRepository);
+        commandControllerUnderTest = new CommandController(commandMapper,mockCommandOrchestrator, mockCommandRepository);
     }
 
     @Test
