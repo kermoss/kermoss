@@ -31,10 +31,27 @@ spring.datasource.hikari:
   connection-timeout: 60000
   maximum-pool-size: 5
 
-kermoss.serviceName: pizza-shop
-market-service: http://localhost:${server.port}/command-executor/commands
-shippement-service: http://localhost:${server.port}/command-executor/commands
-pizza-shop: http://localhost:${server.port}/command-executor/commands
+kermoss:
+  service-name: pizza-shop 
+  transport:
+    default-layer: kafka
+    kafka:
+      consumer:
+         group-name: ${kermoss.service-name}       
+      bootstrap-address: localhost:29092,localhost:29093,localhost:29094
+  destinations:
+      market-service:
+          kafka: io.kermoss.topics.pizzashop.marketservice
+          http: http://localhost:8081/command-executor/commands
+          feign: market-service
+      shippement-service:
+           kafka: io.kermoss.topics.pizzashop.shippementservice
+           http: http://localhost:8081/command-executor/commands
+           feign: shippement-service
+      pizza-shop: 
+           kafka: io.kermoss.topics.pizzashop
+           http: http://localhost:8081/command-executor/commands
+           feign: pizza-shop
 
 ribbon:
   eureka:

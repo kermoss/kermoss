@@ -29,6 +29,8 @@
 		<powermock.version>1.7.1</powermock.version>
 		<feign-jackson>8.18.0</feign-jackson>
 		<wiremock>2.18.0</wiremock>
+		<kafka.version>1.3.8.RELEASE</kafka.version>
+		<postgres.version>9.4-1206-jdbc42</postgres.version>
 	</properties>
 
 	<modules>
@@ -47,6 +49,16 @@
 				<type>pom</type>
 				<scope>import</scope>
 			</dependency>
+			<dependency>
+				<groupId>org.postgresql</groupId>
+				<artifactId>postgresql</artifactId>
+				<version>${postgres.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.springframework.kafka</groupId>
+				<artifactId>spring-kafka</artifactId>
+				<version>${kafka.version}</version>
+			</dependency>
 
 			<dependency>
 				<groupId>io.kermoss</groupId>
@@ -59,7 +71,7 @@
 				<artifactId>HikariCP</artifactId>
 				<version>${hikari.version}</version>
 			</dependency>
-			
+
 			<dependency>
 				<groupId>org.mariadb.jdbc</groupId>
 				<artifactId>mariadb-java-client</artifactId>

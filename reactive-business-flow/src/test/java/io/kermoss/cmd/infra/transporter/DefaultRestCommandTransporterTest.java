@@ -1,5 +1,16 @@
 package io.kermoss.cmd.infra.transporter;
 
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Matchers.same;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.mockito.MockitoAnnotations.initMocks;
+
+import java.util.Optional;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.InjectMocks;
@@ -9,22 +20,14 @@ import org.springframework.core.env.Environment;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.HttpClientErrorException;
-import org.springframework.web.client.RestTemplate;
 
 import io.kermoss.cmd.domain.CommandMeta;
 import io.kermoss.cmd.domain.OutboundCommand;
-import io.kermoss.cmd.domain.TransporterCommand;
 import io.kermoss.cmd.domain.event.OutboundCommandStarted;
 import io.kermoss.cmd.domain.repository.CommandRepository;
-import io.kermoss.cmd.infra.transporter.DefaultCommandTransporter;
 import io.kermoss.cmd.infra.transporter.strategies.CommandTransporterStrategy;
 import io.kermoss.infra.KermossTracer;
 import io.kermoss.infra.KermossTxLogger;
-
-import java.util.Optional;
-
-import static org.mockito.Mockito.*;
-import static org.mockito.MockitoAnnotations.initMocks;
 
 public class DefaultRestCommandTransporterTest {
 

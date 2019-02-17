@@ -7,16 +7,16 @@ app:
 
 # Oracle settings
 spring.datasource:
-  url: jdbc:oracle:thin:@localhost:49161:xe
-  username: system
-  password: oracle
-  driver-class-name: oracle.jdbc.driver.OracleDriver
+  url: jdbc:postgresql://localhost:5432/pizzashop
+  username: postgres
+  password: mysecretpassword
+  driver-class-name: org.postgresql.Driver
 
 
 # Hibernate settings
 spring.jpa.show-sql: true
 spring.jpa.hibernate.ddl-auto: create
-spring.jpa.properties.hibernate.dialect: org.hibernate.dialect.Oracle10gDialect
+spring.jpa.properties.hibernate.dialect: org.hibernate.dialect.PostgreSQLDialect
 spring.jpa.properties.hibernate.hbm2ddl.auto: create
 
 # HikariCP settings
@@ -25,14 +25,39 @@ spring.datasource.hikari:
   connection-timeout: 60000
   maximum-pool-size: 5
 
-kermoss.serviceName: pizza-shop
-market-service: http://localhost:8081/command-executor/commands
-shippement-service: http://localhost:8081/command-executor/commands
-pizza-shop: http://localhost:8081/command-executor/commands
 
-logging.level.org.springframework.transaction: TRACE
+kermoss:
+  service-name: pizza-shop 
+  transport:
+    default-layer: kafka
+    kafka:
+      consumer:
+         group-name: ${kermoss.service-name}       
+      bootstrap-address: localhost:29092,localhost:29093,localhost:29094
+  destinations:
+      market-service:
+          kafka: io.kermoss.topics.pizzashop.marketservice
+          http: http://localhost:8081/command-executor/commands
+          feign: market-service
+      shippement-service:
+           kafka: io.kermoss.topics.pizzashop.shippementservice
+           http: http://localhost:8081/command-executor/commands
+           feign: shippement-service
+      pizza-shop: 
+           kafka: io.kermoss.topics.pizzashop
+           http: http://localhost:8081/command-executor/commands
+           feign: pizza-shop 
+                   
+
+logging.level.org.springframework.transaction: ERROR
 
 ribbon:
   eureka:
     enabled: false
   listOfServers: localhost:8081
+---
+spring:
+  sleuth:
+    enabled: true
+  zipkin:
+    enabled: false

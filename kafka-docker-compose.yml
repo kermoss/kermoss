@@ -1,0 +1,63 @@
+version: '2'
+
+services:
+  zookeeper:
+    image: 'bitnami/zookeeper:latest'
+    ports:
+      - '2181:2181'
+    environment:
+      - ALLOW_ANONYMOUS_LOGIN=yes
+  kafka0:
+    depends_on:
+    - zookeeper
+    image: 'bitnami/kafka:latest'
+    ports:
+      - '9092:9092'
+      - '29092:29092'
+    environment:
+      - KAFKA_BROKER_ID=-1
+      - KAFKA_LISTENERS=INSIDE://:9092,OUTSIDE://:29092
+      - KAFKA_ADVERTISED_LISTENERS=INSIDE://:9092,OUTSIDE://localhost:29092
+      - KAFKA_PORT_NUMBER=9092
+      - KAFKA_ZOOKEEPER_CONNECT=zookeeper:2181
+      - ALLOW_PLAINTEXT_LISTENER=yes
+      - KAFKA_LISTENER_SECURITY_PROTOCOL_MAP=INSIDE:PLAINTEXT,OUTSIDE:PLAINTEXT
+      - KAFKA_INTER_BROKER_LISTENER_NAME=INSIDE
+  kafka1:
+    depends_on:
+    - zookeeper
+    image: 'bitnami/kafka:latest'
+    ports:
+      - '9093:9093'
+      - '29093:29093'
+    environment:
+      - KAFKA_BROKER_ID=-1
+      - KAFKA_LISTENERS=INSIDE://:9093,OUTSIDE://:29093
+      - KAFKA_ADVERTISED_LISTENERS=INSIDE://:9093,OUTSIDE://localhost:29093
+      - KAFKA_PORT_NUMBER=9093
+      - KAFKA_ZOOKEEPER_CONNECT=zookeeper:2181
+      - ALLOW_PLAINTEXT_LISTENER=yes
+      - KAFKA_LISTENER_SECURITY_PROTOCOL_MAP=INSIDE:PLAINTEXT,OUTSIDE:PLAINTEXT
+      - KAFKA_INTER_BROKER_LISTENER_NAME=INSIDE
+  kafka2:
+    depends_on:
+     - zookeeper
+    image: 'bitnami/kafka:latest'
+    ports:
+      - '9094:9094'
+      - '29094:29094'
+    environment:
+      - KAFKA_BROKER_ID=-1
+      - KAFKA_LISTENERS=INSIDE://:9094,OUTSIDE://:29094
+      - KAFKA_ADVERTISED_LISTENERS=INSIDE://:9094,OUTSIDE://localhost:29094
+      - KAFKA_PORT_NUMBER=9094
+      - KAFKA_ZOOKEEPER_CONNECT=zookeeper:2181
+      - ALLOW_PLAINTEXT_LISTENER=yes
+      - KAFKA_LISTENER_SECURITY_PROTOCOL_MAP=INSIDE:PLAINTEXT,OUTSIDE:PLAINTEXT
+      - KAFKA_INTER_BROKER_LISTENER_NAME=INSIDE
+
+volumes:
+  zookeeper_data:
+    driver: local
+  kafka_data:
+    driver: local

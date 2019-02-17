@@ -8,15 +8,18 @@ import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
 import io.kermoss.cmd.domain.TransporterCommand;
+import io.kermoss.props.Destination;
+import io.kermoss.props.KermossProperties;
 
 public final class RestCommandTransporterStrategy implements CommandTransporterStrategy {
     private final Logger log = LoggerFactory.getLogger(RestCommandTransporterStrategy.class);
     private final RestTemplate restTemplate;
-    private final Environment environment;
+    private final KermossProperties kermossProperties;
 
-    public RestCommandTransporterStrategy(final RestTemplate restTemplate, final Environment environment) {
+    public RestCommandTransporterStrategy(final RestTemplate restTemplate, 
+    		KermossProperties kermossProperties) {
         this.restTemplate = restTemplate;
-        this.environment = environment;
+        this.kermossProperties = kermossProperties;
     }
 
     @Override
@@ -77,7 +80,8 @@ public final class RestCommandTransporterStrategy implements CommandTransporterS
         );
     }
 
-    private String calculateDestination(final String destination) {
-        return this.environment.getProperty(destination);
-    }
+    private String calculateDestination(final String destinationKey) {
+		String topic = kermossProperties.getHttpDestination(destinationKey); 
+		return topic;
+	}
 }

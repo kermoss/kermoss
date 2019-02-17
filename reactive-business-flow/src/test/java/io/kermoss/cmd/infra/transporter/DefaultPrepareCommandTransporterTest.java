@@ -20,6 +20,7 @@ import io.kermoss.cmd.domain.repository.CommandRepository;
 import io.kermoss.cmd.exception.PreparedCommandTransportException;
 import io.kermoss.cmd.infra.transporter.DefaultPrepareCommandTransporter;
 import io.kermoss.cmd.infra.transporter.strategies.CommandTransporterStrategy;
+import io.kermoss.cmd.infra.transporter.strategies.HttpClientStrategy;
 import io.kermoss.infra.KermossTxLogger;
 
 import java.util.Optional;
@@ -41,9 +42,10 @@ public class DefaultPrepareCommandTransporterTest {
     @Mock
     private RestTemplate mockRestTemplate;
     @Mock
-    private CommandTransporterStrategy strategy;
+    private HttpClientStrategy clientStrategy;
     @Mock
     KermossTxLogger txLogger;
+    
 
     @InjectMocks
     private DefaultPrepareCommandTransporter prepareRestCommandTransporter;
@@ -56,8 +58,10 @@ public class DefaultPrepareCommandTransporterTest {
         final CommandMeta meta = mock(CommandMeta.class);
         final OutboundCommand command = mock(OutboundCommand.class);
         final ResponseEntity entity = mock(ResponseEntity.class);
-
+        
         CommonSetup(event, meta, command);
+        CommandTransporterStrategy strategy = mock(CommandTransporterStrategy.class);  
+        when(clientStrategy.get()).thenReturn(strategy);
         when(strategy.transportPrepareCommand(any())).thenReturn(true);
         when(mockRestTemplate.exchange(anyString(), any(), any(), same(TransporterCommand.class))).thenReturn(entity);
         when(entity.getStatusCode()).thenReturn(HttpStatus.OK);
@@ -76,6 +80,8 @@ public class DefaultPrepareCommandTransporterTest {
         final OutboundCommandPrepared event = mock(OutboundCommandPrepared.class);
         final CommandMeta meta = mock(CommandMeta.class);
         final OutboundCommand command = mock(OutboundCommand.class);
+        CommandTransporterStrategy strategy = mock(CommandTransporterStrategy.class);  
+        when(clientStrategy.get()).thenReturn(strategy);
         final ResponseEntity entity = mock(ResponseEntity.class);
 
         CommonSetup(event, meta, command);

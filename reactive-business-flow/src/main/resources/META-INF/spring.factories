@@ -1,2 +1,4 @@
 org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
-    io.kermoss.config.ReactiveBusinessFlowConfig
+    io.kermoss.config.ReactiveBusinessFlowConfig,\
+    io.kermoss.config.KafkaConsumerConfig,\
+    io.kermoss.config.KafkaProducerConfig
