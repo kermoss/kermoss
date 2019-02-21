@@ -19,10 +19,10 @@ public class BusinessLocalTransactionAspect {
 	@Autowired
 	KermossTracer tracer;
 
-    final BusinessLocalTransactionManager businessTransactionManager;
+    final BusinessLocalTransactionManager businessLocalTransactionManager;
 
     public BusinessLocalTransactionAspect(BusinessLocalTransactionManager businessTransactionManager){
-        this.businessTransactionManager = businessTransactionManager;
+        this.businessLocalTransactionManager = businessTransactionManager;
     }
 
     @Pointcut("@annotation(io.kermoss.trx.app.annotation.BusinessLocalTransactional)")
@@ -34,18 +34,29 @@ public class BusinessLocalTransactionAspect {
     public void moveLocalTransactionPointcut(){
         throw new PoincutDefinitionException();
     }
+    
+    @Pointcut("@annotation(io.kermoss.trx.app.annotation.RollBackBusinessLocalTransactional)")
+    public void rollBackLocalTransactionPointcut(){
+        throw new PoincutDefinitionException();
+    }
 
 
     @Around("localTransactionPointcut()")
     public void beginLocalTransaction(ProceedingJoinPoint pjp) throws Throwable {
         LocalTransactionStepDefinition pipeline = (LocalTransactionStepDefinition) pjp.proceed();
-        this.businessTransactionManager.begin(pipeline);
+        this.businessLocalTransactionManager.begin(pipeline);
        
     }
 
     @Around("moveLocalTransactionPointcut()")
     public void moveLocalTransaction(ProceedingJoinPoint pjp) throws Throwable {
         LocalTransactionStepDefinition pipeline = (LocalTransactionStepDefinition) pjp.proceed();
-        this.businessTransactionManager.commit(pipeline);
+        this.businessLocalTransactionManager.commit(pipeline);
+    }
+    
+    @Around("rollBackLocalTransactionPointcut()")
+    public void rollBackTransaction(ProceedingJoinPoint pjp) throws Throwable {
+        LocalTransactionStepDefinition pipeline = (LocalTransactionStepDefinition) pjp.proceed();
+        this.businessLocalTransactionManager.rollBack(pipeline);
     }
 }

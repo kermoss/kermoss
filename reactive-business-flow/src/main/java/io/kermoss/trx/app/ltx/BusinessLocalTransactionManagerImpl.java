@@ -95,8 +95,6 @@ public class BusinessLocalTransactionManagerImpl implements BusinessLocalTransac
 				if (ltx.getState().equals(LocalTransaction.LocalTransactionStatus.STARTED)) {
 					ltx.setState(LocalTransaction.LocalTransactionStatus.COMITTED);
 					localTransactionStepDefinition.accept(buildInnerLocalTxStep(localTransaction));
-					//TODO make tests without save
-					//this.localTransactionRepository.save(ltx);
 				}
 			localTransactionStepDefinition.accept(buildOuterLocalTxStep(localTransaction));
 			}
@@ -166,6 +164,20 @@ public class BusinessLocalTransactionManagerImpl implements BusinessLocalTransac
 					ltx.addNestedLocalTransaction(nestTransaction);
 				}
 		);
+	}
+
+	@Override
+	public void rollBack(
+			LocalTransactionStepDefinition<? extends BaseTransactionEvent> localTransactionStepDefinition) {
+Optional<GlobalTransaction> globalTransaction = this.getGlobalTransaction(localTransactionStepDefinition);
+		
+		Optional<LocalTransaction> localTransaction = globalTransaction
+				.map(gtx -> getLocalTransaction(gtx.getId(),
+						localTransactionStepDefinition.getMeta().getTransactionName()))
+				.orElseGet(() -> Optional.empty());
+		if(localTransaction.isPresent()) {
+			localTransaction.get().setState(LocalTransaction.LocalTransactionStatus.ROLLBACKED);
+		}
 	}
 
 }

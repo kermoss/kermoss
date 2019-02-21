@@ -3,6 +3,7 @@ package io.kermoss.bfm.pipeline;
 import java.util.Optional;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
+import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
@@ -17,8 +18,8 @@ public class GlobalTransactionStepDefinition<T extends BaseGlobalTransactionEven
     private Stream<BaseTransactionCommand> prepare;
 
 
-    public GlobalTransactionStepDefinition(BaseGlobalTransactionEvent in, Optional<Supplier> process, Stream<BaseTransactionCommand> send, Stream<BaseTransactionEvent> blow, ReceivedCommand receivedCommand, Optional<Consumer<String>> attach, ReceivedCommandGTX receivedCommandGTX, WorkerMeta meta, Stream<BaseTransactionCommand> prepare) {
-        super(in, process, send, blow, receivedCommand, attach, receivedCommandGTX);
+    public GlobalTransactionStepDefinition(BaseGlobalTransactionEvent in, Optional<Supplier> process, Stream<BaseTransactionCommand> send, Stream<BaseTransactionEvent> blow, ReceivedCommand receivedCommand, Optional<Consumer<String>> attach, ReceivedCommandGTX receivedCommandGTX, WorkerMeta meta, Stream<BaseTransactionCommand> prepare,CompensateWhen compensateWhen) {
+        super(in, process, send, blow, receivedCommand, attach, receivedCommandGTX,compensateWhen);
         this.meta = meta;
         this.prepare = prepare;
     }
@@ -55,6 +56,7 @@ public class GlobalTransactionStepDefinition<T extends BaseGlobalTransactionEven
         private ReceivedCommand receivedCommand;
         private Optional<Consumer<String>> attach;
         private ReceivedCommandGTX receivedCommandGTX;
+        private CompensateWhen compensateWhen;
 
 
         GlobalTransactionPipelineBuilder() {
@@ -104,21 +106,24 @@ public class GlobalTransactionStepDefinition<T extends BaseGlobalTransactionEven
             this.receivedCommandGTX = new AbstractTransactionStepDefinition.ReceivedCommandGTX<P>( target, biConsumer);
             return this;
         }
+        
+        public <E extends Class<Exception>> GlobalTransactionStepDefinition.GlobalTransactionPipelineBuilder<T> compensateWhen(E... exceptions){
+            this.compensateWhen = new AbstractTransactionStepDefinition.CompensateWhen<E>(exceptions);
+            return this;
+        }
 
         public GlobalTransactionStepDefinition<T> build() {
-            return new GlobalTransactionStepDefinition<T>(in, process, send, blow, receivedCommand, attach, receivedCommandGTX, meta, prepare);
+            return new GlobalTransactionStepDefinition<T>(in, process, send, blow, receivedCommand, attach, receivedCommandGTX, meta, prepare,compensateWhen);
         }
 
-        @Override
-        public String toString() {
-            return "GlobalTransactionPipelineBuilder{" +
-                    "in=" + in +
-                    ", process=" + process +
-                    ", send=" + send +
-                    ", blow=" + blow +
-                    ", meta=" + meta +
-                    ", receivedCommand=" + receivedCommand +
-                    '}';
-        }
+		@Override
+		public String toString() {
+			return "GlobalTransactionPipelineBuilder [in=" + in + ", process=" + process + ", send=" + send
+					+ ", prepare=" + prepare + ", blow=" + blow + ", meta=" + meta + ", receivedCommand="
+					+ receivedCommand + ", attach=" + attach + ", receivedCommandGTX=" + receivedCommandGTX
+					+ ", compensateWhen=" + compensateWhen + "]";
+		}
+
+       
     }
 }

@@ -34,6 +34,8 @@ kermoss:
       consumer:
          group-name: ${kermoss.service-name}       
       bootstrap-address: localhost:29092,localhost:29093,localhost:29094
+#      bootstrap-address: 192.168.3.127:9092,192.168.3.128:9092,192.168.3.129:9092
+       
   destinations:
       market-service:
           kafka: io.kermoss.topics.pizzashop.marketservice

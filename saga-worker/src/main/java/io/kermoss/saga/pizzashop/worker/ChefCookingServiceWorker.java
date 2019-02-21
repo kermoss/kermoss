@@ -9,6 +9,7 @@ import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import io.kermoss.bfm.event.ErrorLocalOccured;
 import io.kermoss.bfm.pipeline.LocalTransactionStepDefinition;
 import io.kermoss.bfm.worker.LocalTransactionWorker;
 import io.kermoss.bfm.worker.WorkerMeta;
@@ -21,10 +22,11 @@ import io.kermoss.saga.pizzashop.event.OrderPizzaPendingEvent;
 import io.kermoss.saga.pizzashop.event.OrderPizzaReadyEvent;
 import io.kermoss.saga.pizzashop.service.PizzaService;
 import io.kermoss.trx.app.annotation.BusinessLocalTransactional;
+import io.kermoss.trx.app.annotation.RollBackBusinessLocalTransactional;
 import io.kermoss.trx.app.annotation.SwitchBusinessLocalTransactional;
 
 @Component
-public class ChefCookingServiceWorker extends LocalTransactionWorker<OrderPizzaPendingEvent, OrderPizzaCookedEvent> {
+public class ChefCookingServiceWorker extends LocalTransactionWorker<OrderPizzaPendingEvent, OrderPizzaCookedEvent,ErrorLocalOccured> {
 
     
 
@@ -89,4 +91,10 @@ public class ChefCookingServiceWorker extends LocalTransactionWorker<OrderPizzaP
         };
         return Optional.of(s);
     }
+
+	@Override
+	@RollBackBusinessLocalTransactional
+	public LocalTransactionStepDefinition onError(ErrorLocalOccured errorLocalOccured) {
+		return LocalTransactionStepDefinition.builder().in(errorLocalOccured).meta(this.meta).build();
+	}
 }

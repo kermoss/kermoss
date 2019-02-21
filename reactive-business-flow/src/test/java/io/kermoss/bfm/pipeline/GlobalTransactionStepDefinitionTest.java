@@ -51,7 +51,7 @@ public class GlobalTransactionStepDefinitionTest {
         receivedCommand = null;
         attach = null;
         receivedCommandGTX = null;
-        globalTransactionStepDefinitionUnderTest = new GlobalTransactionStepDefinition<>(mockIn, process, mockSend, mockBlow, receivedCommand, attach, receivedCommandGTX, mockMeta, mockPrepare);
+        globalTransactionStepDefinitionUnderTest = new GlobalTransactionStepDefinition<>(mockIn, process, mockSend, mockBlow, receivedCommand, attach, receivedCommandGTX, mockMeta, mockPrepare,null);
     }
 
     @Test

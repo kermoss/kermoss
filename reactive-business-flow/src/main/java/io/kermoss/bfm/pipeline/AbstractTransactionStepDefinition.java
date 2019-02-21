@@ -1,15 +1,15 @@
 package io.kermoss.bfm.pipeline;
 
-import javax.validation.constraints.NotNull;
-
-import io.kermoss.bfm.cmd.BaseTransactionCommand;
-import io.kermoss.bfm.event.BaseTransactionEvent;
-
 import java.util.Optional;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
+
+import javax.validation.constraints.NotNull;
+
+import io.kermoss.bfm.cmd.BaseTransactionCommand;
+import io.kermoss.bfm.event.BaseTransactionEvent;
 
 public abstract class AbstractTransactionStepDefinition<F extends BaseTransactionEvent> {
 
@@ -19,10 +19,12 @@ public abstract class AbstractTransactionStepDefinition<F extends BaseTransactio
 	private Stream<BaseTransactionEvent> blow;
 	private ReceivedCommand receivedCommand;
 	private ReceivedCommandGTX receivedCommandGTX;
+	private CompensateWhen compensateWhen;
 	private Optional<Consumer<String>> attach;
 
-
-	public AbstractTransactionStepDefinition(F in, Optional<Supplier> process, Stream<BaseTransactionCommand> send, Stream<BaseTransactionEvent> blow, ReceivedCommand receivedCommand, Optional<Consumer<String>> attach, ReceivedCommandGTX receivedCommandGTX) {
+	public AbstractTransactionStepDefinition(F in, Optional<Supplier> process, Stream<BaseTransactionCommand> send,
+			Stream<BaseTransactionEvent> blow, ReceivedCommand receivedCommand, Optional<Consumer<String>> attach,
+			ReceivedCommandGTX receivedCommandGTX, CompensateWhen compensateWhen) {
 		this.in = in;
 		this.process = process;
 		this.send = send;
@@ -30,12 +32,13 @@ public abstract class AbstractTransactionStepDefinition<F extends BaseTransactio
 		this.receivedCommand = receivedCommand;
 		this.attach = attach;
 		this.receivedCommandGTX = receivedCommandGTX;
+		this.compensateWhen = compensateWhen;
 	}
 
 	public AbstractTransactionStepDefinition() {
-    }
+	}
 
-    public F getIn() {
+	public F getIn() {
 		return in;
 	}
 
@@ -55,6 +58,10 @@ public abstract class AbstractTransactionStepDefinition<F extends BaseTransactio
 		return receivedCommand;
 	}
 
+	public <E extends Class<Exception>> CompensateWhen<E> getCompensateWhen() {
+		return compensateWhen;
+	}
+
 	public <P> ReceivedCommandGTX<P> getReceivedCommandGTX() {
 		return receivedCommandGTX;
 	}
@@ -71,6 +78,41 @@ public abstract class AbstractTransactionStepDefinition<F extends BaseTransactio
 		return attach;
 	}
 
+	public static class CompensateWhen<E extends Class<? extends Exception>> {
+		private E[] exceptionClazz;
+		private Stream<BaseTransactionEvent> blow;
+		private Propagation propagation = Propagation.LOCAL;
+
+		public CompensateWhen(E... exceptionClazz) {
+			this.exceptionClazz = exceptionClazz;
+		}
+
+		public CompensateWhen(Propagation propagation, E... exceptionClazz) {
+			this.propagation=propagation;
+			this.exceptionClazz = exceptionClazz;
+		}
+		public CompensateWhen(Propagation propagation, Stream<BaseTransactionEvent> blow,E... exceptionClazz) {
+			this.propagation=propagation;
+			this.blow = blow;
+			this.exceptionClazz = exceptionClazz;
+					 
+		}
+
+		public void setBlow(Stream<BaseTransactionEvent> blow) {
+			this.blow = blow;
+		}
+
+		public E[] getExceptions() {
+			return exceptionClazz;
+		}
+
+		public Propagation getPropagation() {
+			return propagation;
+		}
+		public Stream<BaseTransactionEvent> getBlow() {
+			return blow;
+		}
+	}
 
 	public static class ReceivedCommand<P> {
 		@NotNull
@@ -104,6 +146,7 @@ public abstract class AbstractTransactionStepDefinition<F extends BaseTransactio
 			this.target = target;
 			this.consumer = consumer;
 		}
+
 		@NotNull
 		public Class<P> getTarget() {
 			return target;
