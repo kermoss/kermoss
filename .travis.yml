@@ -4,5 +4,6 @@ jdk:
  - oraclejdk8
 before_install:
   - chmod +x mvnw
+script: "./mvnw -pl '!saga-worker' clean install"
 after_success:
   - bash <(curl -s https://codecov.io/bash)

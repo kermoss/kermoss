@@ -39,11 +39,11 @@ public class ChefPayDeliveryServiceWorker extends LocalTransactionWorker<Deliver
 		return LocalTransactionStepDefinition.builder().in(deliveryBillArrivedEvent)
 				.blow(Stream.of(new DeliveryBillPayed())).receive(Bill.class, x -> {
 					System.out.println(x.toString());
-//					if (x.getPrice() > 2) {
-//                     throw new ExpensiveException("pizza is too much expensive");
-//					}
+					if (x.getPrice() > 2) {
+                     throw new ExpensiveException("pizza is too much expensive");
+					}
 				})
-//				.compensateWhen(Propagation.LOCAL,Stream.of(new PizzaRejectedEvent()),DelayException.class, ExpensiveException.class)
+				.compensateWhen(Propagation.LOCAL,Stream.of(new PizzaRejectedEvent()),DelayException.class, ExpensiveException.class)
 //			.compensateWhen(DelayException.class, ExpensiveException.class)
 				.receive(Bill.class, (x, y) -> log.info("linking object {} with gtx {}", y, x)).meta(this.meta).build();
 
