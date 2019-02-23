@@ -16,14 +16,14 @@ import static org.mockito.Mockito.*;
 public class BusinessLocalTransactionAspectTest {
 
     @Mock
-    private BusinessLocalTransactionManager mockBusinessTransactionManager;
+    private BusinessLocalTransactionManager mockBusinessLocalTransactionManager;
 
     private BusinessLocalTransactionAspect businessLocalTransactionAspectUnderTest;
 
     @Before
     public void setUp() {
         initMocks(this);
-        businessLocalTransactionAspectUnderTest = new BusinessLocalTransactionAspect(mockBusinessTransactionManager);
+        businessLocalTransactionAspectUnderTest = new BusinessLocalTransactionAspect(mockBusinessLocalTransactionManager);
     }
 
     @Test(expected = PoincutDefinitionException.class)
@@ -45,6 +45,10 @@ public class BusinessLocalTransactionAspectTest {
 
         // Verify the results
     }
+    @Test(expected = PoincutDefinitionException.class)
+    public void testRollBackLocalTransactionPointcut() {
+    	businessLocalTransactionAspectUnderTest.rollBackLocalTransactionPointcut();
+    }
 
     @Test
     public void testBeginLocalTransaction() throws Throwable {
@@ -58,7 +62,7 @@ public class BusinessLocalTransactionAspectTest {
         businessLocalTransactionAspectUnderTest.beginLocalTransaction(pjp);
 
         // Verify the results
-        verify(mockBusinessTransactionManager, times(1)).begin(localTransactionStepDefinition);
+        verify(mockBusinessLocalTransactionManager, times(1)).begin(localTransactionStepDefinition);
 
     }
 
@@ -74,7 +78,24 @@ public class BusinessLocalTransactionAspectTest {
         businessLocalTransactionAspectUnderTest.moveLocalTransaction(pjp);
 
         // Verify the results
-        verify(mockBusinessTransactionManager, times(1)).commit(localTransactionStepDefinition);
+        verify(mockBusinessLocalTransactionManager, times(1)).commit(localTransactionStepDefinition);
+
+    }
+    
+    
+    @Test
+    public void testRollBackTransaction() throws Throwable {
+        // Setup
+        final ProceedingJoinPoint pjp = mock(ProceedingJoinPoint.class);
+        final LocalTransactionStepDefinition localTransactionStepDefinition = mock(LocalTransactionStepDefinition.class);
+
+        when(pjp.proceed()).thenReturn(localTransactionStepDefinition);
+
+        // Run the test
+        businessLocalTransactionAspectUnderTest.rollBackTransaction(pjp);
+
+        // Verify the results
+        verify(mockBusinessLocalTransactionManager, times(1)).rollBack(localTransactionStepDefinition);
 
     }
 }
