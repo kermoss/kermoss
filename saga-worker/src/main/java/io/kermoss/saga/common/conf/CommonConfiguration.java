@@ -21,5 +21,6 @@ public class CommonConfiguration extends DecoderRegistry {
         this.put("deliver-pizza", decoder1);
         CallDecoder callDecoder = new CallDecoder();
         this.put("call-market", callDecoder);
+        this.put("rollback-global", new RollBackGlobalDecoder());
     }
 }

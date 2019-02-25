@@ -8,6 +8,7 @@ import java.util.stream.Stream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -27,6 +28,7 @@ import io.kermoss.trx.app.annotation.RollBackBusinessLocalTransactional;
 import io.kermoss.trx.app.annotation.SwitchBusinessLocalTransactional;
 
 @Component
+@Profile({"single","shop"})
 public class BakerPizzaServiceWorker extends LocalTransactionWorker<BakingPizzaPendingEvent, BakingPizzaReadyEvent,ErrorLocalOccured> {
 
 	@Autowired

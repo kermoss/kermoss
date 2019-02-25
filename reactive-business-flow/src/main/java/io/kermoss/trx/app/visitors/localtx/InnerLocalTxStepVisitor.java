@@ -12,6 +12,7 @@ import org.springframework.context.ApplicationEventPublisher;
 import io.kermoss.bfm.event.BaseLocalTransactionEvent;
 import io.kermoss.bfm.event.BaseTransactionEvent;
 import io.kermoss.bfm.event.ErrorLocalOccured;
+import io.kermoss.bfm.event.GlobalRollbackOccured;
 import io.kermoss.bfm.pipeline.AbstractTransactionStepDefinition;
 import io.kermoss.bfm.pipeline.AbstractTransactionStepDefinition.CompensateWhen;
 import io.kermoss.bfm.pipeline.LocalTransactionStepDefinition;
@@ -63,27 +64,33 @@ public class InnerLocalTxStepVisitor extends StepLocalTxVisitor {
 
 	}
 
-   void compensatingLocalTransaction(
+	void compensatingLocalTransaction(
 			LocalTransactionStepDefinition<? extends BaseLocalTransactionEvent> transactionPipeline,
 			Exception exception) {
+		
 		LOG.error("Kermoss Compensate Transaction On ", exception);
 		CompensateWhen<Class<Exception>> compensateWhen = transactionPipeline.getCompensateWhen();
-		if(Propagation.GLOBAL.equals(compensateWhen.getPropagation())) {
-			throw new IllegalArgumentException("Propagation.GLOBAL policy not yet implemented");
-		}
+
 		if (compensateWhen != null) {
 			Stream<Class<Exception>> exs = Stream.of(compensateWhen.getExceptions());
 			if (exs.anyMatch(ex -> ex.equals(exception.getClass()))) {
 				Stream<BaseTransactionEvent> blowStream = compensateWhen.getBlow();
 				if (blowStream != null) {
-					blowStream.forEach(event ->blowEvent(event));
-				}else {
-					LOG.info("Local Kermoss Compensating Transaction");
-					Message errorOccured = new ErrorLocalOccured();
-					blowEvent(errorOccured);
+					blowStream.forEach(event -> blowEvent(event));
+				} else {
+					if (!Propagation.GLOBAL.equals(compensateWhen.getPropagation())) {
+						LOG.info("Local Kermoss Compensating Transaction");
+						Message errorOccured = new ErrorLocalOccured();
+						blowEvent(errorOccured);
+					}
 				}
 
 			}
+		}
+		if (Propagation.GLOBAL.equals(compensateWhen.getPropagation())) {
+			LOG.info("Kermoss Compensating Transaction: Global Rollback Occured ");
+			Message globalRollbackOccured = new GlobalRollbackOccured(transactionPipeline.getMeta().getChildOf());
+			blowEvent(globalRollbackOccured);
 		}
 	}
 

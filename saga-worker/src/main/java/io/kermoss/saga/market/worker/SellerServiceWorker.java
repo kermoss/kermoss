@@ -2,6 +2,7 @@ package io.kermoss.saga.market.worker;
 
 import java.util.Optional;
 
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 
 import io.kermoss.bfm.pipeline.GlobalTransactionStepDefinition;
@@ -13,6 +14,7 @@ import io.kermoss.trx.app.annotation.BusinessGlobalTransactional;
 import io.kermoss.trx.app.annotation.CommitBusinessGlobalTransactional;
 
 @Component
+@Profile({"single","market"})
 public class SellerServiceWorker extends GlobalTransactionWorker<PhoneRingingEvent, HangOffEvent> {
 
     public SellerServiceWorker() {

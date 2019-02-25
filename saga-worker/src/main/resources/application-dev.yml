@@ -1,10 +1,3 @@
-# Application
-server:
-  port: 8081
-
-app:
-  host: http://localhost:${server.port}
-
 # Oracle settings
 spring.datasource:
   url: jdbc:postgresql://localhost:5432/pizzashop
@@ -15,7 +8,7 @@ spring.datasource:
 
 # Hibernate settings
 spring.jpa.show-sql: true
-spring.jpa.hibernate.ddl-auto: create
+spring.jpa.hibernate.ddl-auto: validate
 spring.jpa.properties.hibernate.dialect: org.hibernate.dialect.PostgreSQLDialect
 spring.jpa.properties.hibernate.hbm2ddl.auto: create
 
@@ -24,31 +17,6 @@ spring.jpa.properties.hibernate.hbm2ddl.auto: create
 spring.datasource.hikari:
   connection-timeout: 60000
   maximum-pool-size: 5
-
-
-kermoss:
-  service-name: pizza-shop 
-  transport:
-    default-layer: kafka
-    kafka:
-      consumer:
-         group-name: ${kermoss.service-name}       
-      bootstrap-address: localhost:29092,localhost:29093,localhost:29094
-#      bootstrap-address: 192.168.3.127:9092,192.168.3.128:9092,192.168.3.129:9092
-       
-  destinations:
-      market-service:
-          kafka: io.kermoss.topics.pizzashop.marketservice
-          http: http://localhost:8081/command-executor/commands
-          feign: market-service
-      shippement-service:
-           kafka: io.kermoss.topics.pizzashop.shippementservice
-           http: http://localhost:8081/command-executor/commands
-           feign: shippement-service
-      pizza-shop: 
-           kafka: io.kermoss.topics.pizzashop
-           http: http://localhost:8081/command-executor/commands
-           feign: pizza-shop 
                    
 
 logging.level.org.springframework.transaction: ERROR

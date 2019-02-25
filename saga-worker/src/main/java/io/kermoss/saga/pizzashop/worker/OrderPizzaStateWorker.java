@@ -5,6 +5,7 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 
 import io.kermoss.bfm.pipeline.GlobalTransactionStepDefinition;
@@ -21,6 +22,7 @@ import io.kermoss.trx.app.annotation.BusinessGlobalTransactional;
 import io.kermoss.trx.app.annotation.CommitBusinessGlobalTransactional;
 
 @Component
+@Profile({"single","shop"})
 public class OrderPizzaStateWorker extends GlobalTransactionWorker<OrderPizzaReceivedEvent, OrderPizzaReadyEvent> {
     @Autowired
     PizzaService pizzaService;

@@ -7,6 +7,7 @@ import java.util.stream.Stream;
 
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 
 import io.kermoss.bfm.event.ErrorLocalOccured;
@@ -26,6 +27,7 @@ import io.kermoss.trx.app.annotation.RollBackBusinessLocalTransactional;
 import io.kermoss.trx.app.annotation.SwitchBusinessLocalTransactional;
 
 @Component
+@Profile({"single","shop"})
 public class ChefCookingServiceWorker extends LocalTransactionWorker<OrderPizzaPendingEvent, OrderPizzaCookedEvent,ErrorLocalOccured> {
 
     

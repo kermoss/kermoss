@@ -1,0 +1,29 @@
+server:
+  port: 8082
+
+app:
+  host: http://localhost:${server.port}
+
+kermoss:
+  service-name: market-serviceY 
+  transport:
+    default-layer: kafka
+    kafka:
+      consumer:
+         group-name: ${kermoss.service-name}       
+      bootstrap-address: localhost:29092,localhost:29093,localhost:29094
+#      bootstrap-address: 192.168.3.127:9092,192.168.3.128:9092,192.168.3.129:9092
+       
+  destinations:
+      market-service:
+          kafka: io.kermoss.topics.pizzashop.marketservice
+          http: http://localhost:8082/command-executor/commands
+          feign: market-service
+#      shippement-service:
+#           kafka: io.kermoss.topics.pizzashop.shippementservice
+#           http: http://localhost:8083/command-executor/commands
+#           feign: shippement-service
+      pizza-shop: 
+           kafka: io.kermoss.topics.pizzashop
+           http: http://localhost:8081/command-executor/commands
+           feign: pizza-shop

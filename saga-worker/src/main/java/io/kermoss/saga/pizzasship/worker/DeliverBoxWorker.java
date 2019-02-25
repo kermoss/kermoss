@@ -2,6 +2,7 @@ package io.kermoss.saga.pizzasship.worker;
 
 import java.util.stream.Stream;
 
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 
 import io.kermoss.bfm.pipeline.GlobalTransactionStepDefinition;
@@ -15,6 +16,7 @@ import io.kermoss.trx.app.annotation.BusinessGlobalTransactional;
 import io.kermoss.trx.app.annotation.CommitBusinessGlobalTransactional;
 
 @Component
+@Profile({"single","ship"})
 public class DeliverBoxWorker extends GlobalTransactionWorker<BoxArrivedEvent, BoxDelivredEvent> {
 
     public DeliverBoxWorker() {
