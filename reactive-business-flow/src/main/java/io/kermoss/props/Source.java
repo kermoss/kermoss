@@ -1,6 +1,6 @@
 package io.kermoss.props;
 
-public class Destination {
+public class Source {
 	
 	private String http;
 	private String feign;

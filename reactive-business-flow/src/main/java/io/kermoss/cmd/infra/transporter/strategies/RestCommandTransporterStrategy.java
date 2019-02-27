@@ -2,13 +2,15 @@ package io.kermoss.cmd.infra.transporter.strategies;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.core.env.Environment;
-import org.springframework.http.*;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
 import io.kermoss.cmd.domain.TransporterCommand;
-import io.kermoss.props.Destination;
 import io.kermoss.props.KermossProperties;
 
 public final class RestCommandTransporterStrategy implements CommandTransporterStrategy {

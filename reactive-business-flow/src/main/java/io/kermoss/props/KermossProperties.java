@@ -15,7 +15,10 @@ import org.springframework.stereotype.Component;
 public class KermossProperties {
 
 	private String serviceName;
-	private Map<String, Destination> destinations;
+	private Map<String, Source> sources;
+
+	private Map<String, Sink> sinks;
+
 	private Transport transport = new Transport();
 
 	public String getServiceName() {
@@ -26,12 +29,12 @@ public class KermossProperties {
 		this.serviceName = serviceName;
 	}
 
-	public Map<String, Destination> getDestinations() {
-		return destinations;
+	public Map<String, Source> getSources() {
+		return sources;
 	}
 
-	public void setDestinations(Map<String, Destination> destinations) {
-		this.destinations = destinations;
+	public void setSources(Map<String, Source> sources) {
+		this.sources = sources;
 	}
 
 	public Transport getTransport() {
@@ -42,19 +45,28 @@ public class KermossProperties {
 		this.transport = transport;
 	}
 
-	// TODO verify topics is empty ;
+	public Map<String, Sink> getSinks() {
+		return sinks;
+	}
+
+	public void setSinks(Map<String, Sink> sinks) {
+		this.sinks = sinks;
+	}
+
 	public List<String> topics() {
-		return  destinations.values().stream().map(x -> x.getKafka()).collect(Collectors.toList());
+		return sinks.values().stream().map(x -> x.getKafka()).collect(Collectors.toList());
 	}
-	
+
 	public String getHttpDestination(String destinationKey) {
-		return destinations.get(destinationKey).getHttp();
+		return sources.get(destinationKey).getHttp();
 	}
-    
+
 	public String getKafkaDestination(String destinationKey) {
-		return destinations.get(destinationKey).getKafka();
+		return sources.get(destinationKey).getKafka();
 	}
+
 	public String getFeignDestination(String destinationKey) {
-		return destinations.get(destinationKey).getFeign();
+		return sources.get(destinationKey).getFeign();
 	}
+
 }

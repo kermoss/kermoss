@@ -5,6 +5,7 @@ import javax.annotation.PostConstruct;
 
 import org.springframework.stereotype.Component;
 
+import io.kermoss.bfm.decoder.RollBackGlobalDecoder;
 import io.kermoss.domain.DecoderRegistry;
 import io.kermoss.saga.market.decoder.CallDecoder;
 import io.kermoss.saga.pizzashop.decoder.PayDeliveryServiceDecoder;
@@ -21,6 +22,5 @@ public class CommonConfiguration extends DecoderRegistry {
         this.put("deliver-pizza", decoder1);
         CallDecoder callDecoder = new CallDecoder();
         this.put("call-market", callDecoder);
-        this.put("rollback-global", new RollBackGlobalDecoder());
     }
 }

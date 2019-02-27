@@ -1,18 +1,22 @@
 package io.kermoss.cmd.infra.transporter.strategies;
 
-import feign.*;
-import feign.jackson.JacksonDecoder;
-import feign.jackson.JacksonEncoder;
-import io.kermoss.cmd.domain.TransporterCommand;
-import io.kermoss.props.Destination;
-import io.kermoss.props.KermossProperties;
+import java.util.function.BiFunction;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.RequestBody;
 
-import java.util.function.BiFunction;
+import feign.Client;
+import feign.Feign;
+import feign.Headers;
+import feign.RequestLine;
+import feign.Response;
+import feign.jackson.JacksonDecoder;
+import feign.jackson.JacksonEncoder;
+import io.kermoss.cmd.domain.TransporterCommand;
+import io.kermoss.props.KermossProperties;
+import io.kermoss.props.Source;
 
 public final class FeignCommandTransporterStrategy implements CommandTransporterStrategy {
 	private final Logger log = LoggerFactory.getLogger(FeignCommandTransporterStrategy.class);
@@ -59,7 +63,7 @@ public final class FeignCommandTransporterStrategy implements CommandTransporter
 	}
 	
 	private String calculateDestination(final String destination) {
-		Destination dest = kermossProperties.getDestinations().get(destination);
+		Source dest = kermossProperties.getSources().get(destination);
 		String topic = dest.getFeign();
 		return topic;
 	}

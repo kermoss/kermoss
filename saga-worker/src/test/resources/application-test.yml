@@ -39,7 +39,9 @@ kermoss:
       consumer:
          group-name: ${kermoss.service-name}       
       bootstrap-address: localhost:29092,localhost:29093,localhost:29094
-  destinations:
+#      bootstrap-address: 192.168.3.127:9092,192.168.3.128:9092,192.168.3.129:9092
+       
+  sources:
       market-service:
           kafka: io.kermoss.topics.pizzashop.marketservice
           http: http://localhost:8081/command-executor/commands
@@ -52,6 +54,13 @@ kermoss:
            kafka: io.kermoss.topics.pizzashop
            http: http://localhost:8081/command-executor/commands
            feign: pizza-shop
+  sinks:
+     market-service:
+          kafka: io.kermoss.topics.pizzashop.marketservice
+     shippement-service:
+           kafka: io.kermoss.topics.pizzashop.shippementservice
+     pizza-shop: 
+           kafka: io.kermoss.topics.pizzashop
 
 ribbon:
   eureka:

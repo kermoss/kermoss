@@ -56,7 +56,6 @@ public class BakerPizzaServiceWorker extends LocalTransactionWorker<BakingPizzaP
 						try {
 							Thread.currentThread().sleep(3000);
 						} catch (InterruptedException e) {
-							// TODO Auto-generated catch block
 							e.printStackTrace();
 						}
 						UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl("http://localhost:8081/pizza/test/order/continue")

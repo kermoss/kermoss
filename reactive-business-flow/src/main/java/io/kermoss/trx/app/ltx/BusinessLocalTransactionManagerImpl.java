@@ -92,7 +92,7 @@ public class BusinessLocalTransactionManagerImpl implements BusinessLocalTransac
 		localTransaction.ifPresent(ltx -> {
 			if(ltx.getNestedLocalTransactions().stream().map(LocalTransaction::getState).allMatch(s -> s.equals(LocalTransaction.LocalTransactionStatus.COMITTED)))
 			{
-				if (ltx.getState().equals(LocalTransaction.LocalTransactionStatus.STARTED)) {
+				if (ltx.getState().equals(LocalTransaction.LocalTransactionStatus.STARTED) && !ltx.getState().equals(LocalTransaction.LocalTransactionStatus.ROLLBACKED)) {
 					ltx.setState(LocalTransaction.LocalTransactionStatus.COMITTED);
 					localTransactionStepDefinition.accept(buildInnerLocalTxStep(localTransaction));
 				}

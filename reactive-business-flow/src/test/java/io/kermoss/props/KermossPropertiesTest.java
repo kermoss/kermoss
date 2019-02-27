@@ -17,17 +17,26 @@ public class KermossPropertiesTest {
 	@Before
 	public void init() {
 		kermossProperties.setServiceName("pizza-shop");
-		Map<String, Destination> destinations = new HashMap<String, Destination>();
-		Destination destination = new Destination();
+		Map<String, Source> destinations = new HashMap<String, Source>();
+		Source destination = new Source();
 		destination.setKafka("io.kermoss.test.pizza-shop");
 		destination.setHttp("http://pizza-shop");
 		destination.setFeign("pizza-shop");
 		destinations.put("pizz-shop", destination);
-		Destination destination1 = new Destination();
+		Source destination1 = new Source();
 		destination1.setKafka("io.kermoss.test.market");
 		destination1.setHttp("http://market");
 		destinations.put("market", destination1);
-		kermossProperties.setDestinations(destinations);
+		kermossProperties.setSources(destinations);
+		Map<String, Sink> sinks = new HashMap<String, Sink>();
+		Sink sink = new Sink();
+		sink.setKafka("io.kermoss.test.pizza-shop");
+		sinks.put("pizza-shop", sink);
+		Sink sink1 = new Sink();
+		sink1.setKafka("io.kermoss.test.market");
+		sinks.put("pizza-market", sink1);
+		kermossProperties.setSinks(sinks);
+		
 	}
 
 	@Test

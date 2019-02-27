@@ -1,4 +1,4 @@
-package io.kermoss.saga.common.conf;
+package io.kermoss.bfm.decoder;
 
 import io.kermoss.bfm.event.BaseTransactionEvent;
 import io.kermoss.bfm.event.ErrorLocalOccured;

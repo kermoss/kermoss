@@ -2,17 +2,22 @@ package io.kermoss.bfm.worker.rollback;
 
 import java.util.stream.Stream;
 
+import javax.annotation.PostConstruct;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import io.kermoss.bfm.cmd.BaseTransactionCommand;
 import io.kermoss.bfm.cmd.RollBackGlobalCommand;
+import io.kermoss.bfm.decoder.RollBackGlobalDecoder;
 import io.kermoss.bfm.event.ErrorGlobalOccured;
+import io.kermoss.bfm.event.ErrorLocalOccured;
 import io.kermoss.bfm.event.GlobalRollbackOccured;
 import io.kermoss.bfm.event.GlobalTransactionLevelRollbacked;
 import io.kermoss.bfm.pipeline.LocalTransactionStepDefinition;
 import io.kermoss.bfm.worker.LocalTransactionWorker;
 import io.kermoss.bfm.worker.WorkerMeta;
+import io.kermoss.cmd.infra.translator.LanguageTranslator;
 import io.kermoss.props.KermossProperties;
 import io.kermoss.trx.app.annotation.BusinessLocalTransactional;
 import io.kermoss.trx.app.annotation.RollBackBusinessLocalTransactional;
@@ -21,21 +26,27 @@ import io.kermoss.trx.app.annotation.SwitchBusinessLocalTransactional;
 @Component
 public class RollBackGlobalWorker extends  LocalTransactionWorker<GlobalRollbackOccured, GlobalTransactionLevelRollbacked,ErrorGlobalOccured> {
     @Autowired
-    KermossProperties kermossProperties;
-	
+    private KermossProperties kermossProperties;
+    @Autowired
+    private LanguageTranslator languageTranslator;
+    
     public RollBackGlobalWorker() {
 		super(new WorkerMeta("RollBackGlobalService"));
 	}
+    
+    @PostConstruct
+    public void init(){
+    	languageTranslator.registerDecoder("rollback-global", new RollBackGlobalDecoder());
+    }
 
     @Override
 	@BusinessLocalTransactional
 	public LocalTransactionStepDefinition onStart(GlobalRollbackOccured globalRollbackOccured) {
     	WorkerMeta workerMeta = new WorkerMeta(this.meta.getTransactionName(),globalRollbackOccured.getTrxChildOf());
-    	Stream<BaseTransactionCommand> cmdStream = kermossProperties.getDestinations().keySet().stream().map(c-> new RollBackGlobalCommand("rollback-global",null, null, c));
-    	
+    	Stream<BaseTransactionCommand> sourceStream = kermossProperties.getSources().keySet().stream().map(c-> new RollBackGlobalCommand("rollback-global",null, null, c));
     	return LocalTransactionStepDefinition.builder().in(globalRollbackOccured)
-				.send(cmdStream)
-    			.blow(Stream.of(new GlobalTransactionLevelRollbacked(globalRollbackOccured.getTrxChildOf())))
+				.send(sourceStream)
+    			.blow(Stream.of(new ErrorLocalOccured(),new GlobalTransactionLevelRollbacked(globalRollbackOccured.getTrxChildOf())))
 				.meta(workerMeta).build();
 
 	}
@@ -50,7 +61,6 @@ public class RollBackGlobalWorker extends  LocalTransactionWorker<GlobalRollback
 
 	@Override
 	@RollBackBusinessLocalTransactional
-	
 	public LocalTransactionStepDefinition onError(ErrorGlobalOccured errorGlobalOccured) {
 		return LocalTransactionStepDefinition.builder().in(errorGlobalOccured).meta(this.meta).build();
 	}
