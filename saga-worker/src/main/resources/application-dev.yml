@@ -10,7 +10,7 @@ spring.datasource:
 spring.jpa.show-sql: true
 spring.jpa.hibernate.ddl-auto: validate
 spring.jpa.properties.hibernate.dialect: org.hibernate.dialect.PostgreSQLDialect
-spring.jpa.properties.hibernate.hbm2ddl.auto: create
+spring.jpa.properties.hibernate.hbm2ddl.auto: none
 
 # HikariCP settings
 # spring.datasource.hikari.*
