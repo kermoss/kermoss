@@ -1,5 +1,7 @@
 package io.kermoss.saga.pizzashop.worker;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
@@ -42,8 +44,11 @@ public class ChefCookingServiceWorker extends LocalTransactionWorker<OrderPizzaP
     @Override
     @BusinessLocalTransactional
     public LocalTransactionStepDefinition onStart(OrderPizzaPendingEvent orderPizzaPendingEvent) {
-        return LocalTransactionStepDefinition.builder()
+        List<String> businessKey= new ArrayList<>();
+        businessKey.add(orderPizzaPendingEvent.getCartID());
+    	return LocalTransactionStepDefinition.builder()
                 .in(orderPizzaPendingEvent)
+                .businessKey(Optional.of(businessKey))
                 .process(makePizzaSupplier(orderPizzaPendingEvent.getCartID()))
                 .blow(Stream.of(new BakingPizzaPendingEvent(orderPizzaPendingEvent.getCartID())))
                 .meta(this.meta)
@@ -53,13 +58,18 @@ public class ChefCookingServiceWorker extends LocalTransactionWorker<OrderPizzaP
     @Override
     @SwitchBusinessLocalTransactional
     public LocalTransactionStepDefinition onNext(OrderPizzaCookedEvent orderPizzaCookedEvent) {
-        ToDilever b = new ToDilever("Some address", pizzaService.getOrders().get(orderPizzaCookedEvent.getCartId()).getPizzas()
+    	List<String> businessKey= new ArrayList<>();
+        businessKey.add(orderPizzaCookedEvent.getCartId());
+        
+    	ToDilever b = new ToDilever("Some address", pizzaService.getOrders().get(orderPizzaCookedEvent.getCartId()).getPizzas()
                 .stream().map(Pizza::getName)
                 .collect(Collectors.toList()));
         OrderPizzaReadyForShipmentCommand cmd = new OrderPizzaReadyForShipmentCommand("deliver-pizza", "",
                 b, "shippement-service");
+        
         return LocalTransactionStepDefinition.builder()
-                .in(orderPizzaCookedEvent)
+                .in(orderPizzaCookedEvent).
+                 businessKey(Optional.of(businessKey))
                 .process(makePizzaReadySupplier(orderPizzaCookedEvent.getCartId()))
                 .blow(Stream.of(new OrderPizzaReadyEvent(orderPizzaCookedEvent.getCartId())))
                 .send(Stream.of(cmd))

@@ -1,5 +1,6 @@
 package io.kermoss.bfm.pipeline;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
@@ -14,6 +15,7 @@ import io.kermoss.bfm.event.BaseTransactionEvent;
 public abstract class AbstractTransactionStepDefinition<F extends BaseTransactionEvent> {
 
 	private F in;
+	private Optional<List<String>> businessKey;
 	private Optional<Supplier> process;
 	private Stream<BaseTransactionCommand> send;
 	private Stream<BaseTransactionEvent> blow;
@@ -22,10 +24,11 @@ public abstract class AbstractTransactionStepDefinition<F extends BaseTransactio
 	private CompensateWhen compensateWhen;
 	private Optional<Consumer<String>> attach;
 
-	public AbstractTransactionStepDefinition(F in, Optional<Supplier> process, Stream<BaseTransactionCommand> send,
-			Stream<BaseTransactionEvent> blow, ReceivedCommand receivedCommand, Optional<Consumer<String>> attach,
-			ReceivedCommandGTX receivedCommandGTX, CompensateWhen compensateWhen) {
+	public AbstractTransactionStepDefinition(F in, Optional<List<String>> businessKey, Optional<Supplier> process,
+			Stream<BaseTransactionCommand> send, Stream<BaseTransactionEvent> blow, ReceivedCommand receivedCommand,
+			Optional<Consumer<String>> attach, ReceivedCommandGTX receivedCommandGTX, CompensateWhen compensateWhen) {
 		this.in = in;
+		this.businessKey = businessKey;
 		this.process = process;
 		this.send = send;
 		this.blow = blow;
@@ -40,6 +43,12 @@ public abstract class AbstractTransactionStepDefinition<F extends BaseTransactio
 
 	public F getIn() {
 		return in;
+	}
+
+	public Optional<List<String>> getBusinessKey() {
+		if (businessKey == null)
+			return Optional.empty();
+		return businessKey;
 	}
 
 	public Optional<Supplier> getProcess() {
@@ -88,14 +97,15 @@ public abstract class AbstractTransactionStepDefinition<F extends BaseTransactio
 		}
 
 		public CompensateWhen(Propagation propagation, E... exceptionClazz) {
-			this.propagation=propagation;
+			this.propagation = propagation;
 			this.exceptionClazz = exceptionClazz;
 		}
-		public CompensateWhen(Propagation propagation, Stream<BaseTransactionEvent> blow,E... exceptionClazz) {
-			this.propagation=propagation;
+
+		public CompensateWhen(Propagation propagation, Stream<BaseTransactionEvent> blow, E... exceptionClazz) {
+			this.propagation = propagation;
 			this.blow = blow;
 			this.exceptionClazz = exceptionClazz;
-					 
+
 		}
 
 		public void setBlow(Stream<BaseTransactionEvent> blow) {
@@ -109,6 +119,7 @@ public abstract class AbstractTransactionStepDefinition<F extends BaseTransactio
 		public Propagation getPropagation() {
 			return propagation;
 		}
+
 		public Stream<BaseTransactionEvent> getBlow() {
 			return blow;
 		}
@@ -135,6 +146,7 @@ public abstract class AbstractTransactionStepDefinition<F extends BaseTransactio
 		}
 	}
 
+	//TODO to be merged in ReceivedCommand
 	public static class ReceivedCommandGTX<P> {
 		@NotNull
 		private Class<P> target;

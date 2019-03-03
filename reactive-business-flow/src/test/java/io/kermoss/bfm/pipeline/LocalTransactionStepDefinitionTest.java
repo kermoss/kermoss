@@ -47,7 +47,7 @@ public class LocalTransactionStepDefinitionTest {
         receivedCommand = null;
         attach = null;
         receivedCommandGTX = null;
-        localTransactionStepDefinitionUnderTest = new LocalTransactionStepDefinition<>(mockIn, process, mockSend, mockBlow, receivedCommand, attach, receivedCommandGTX, mockMeta,null);
+        localTransactionStepDefinitionUnderTest = new LocalTransactionStepDefinition<>(mockIn,null, process, mockSend, mockBlow, receivedCommand, attach, receivedCommandGTX, mockMeta,null);
     }
 
     @Test

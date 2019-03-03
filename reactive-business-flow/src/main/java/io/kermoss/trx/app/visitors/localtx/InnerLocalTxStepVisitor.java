@@ -73,7 +73,7 @@ public class InnerLocalTxStepVisitor extends StepLocalTxVisitor {
 
 		if (compensateWhen != null) {
 			Stream<Class<Exception>> exs = Stream.of(compensateWhen.getExceptions());
-			if (exs.anyMatch(ex -> ex.equals(exception.getClass()))) {
+			if (exs.anyMatch(ex -> ex.isAssignableFrom(exception.getClass()))) {
 				Stream<BaseTransactionEvent> blowStream = compensateWhen.getBlow();
 				if (blowStream != null) {
 					blowStream.forEach(event -> blowEvent(event));

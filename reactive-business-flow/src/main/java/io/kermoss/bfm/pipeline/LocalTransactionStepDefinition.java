@@ -1,5 +1,6 @@
 package io.kermoss.bfm.pipeline;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
@@ -20,12 +21,12 @@ public  class LocalTransactionStepDefinition<T extends BaseLocalTransactionEvent
     @NotNull
     private WorkerMeta meta;
 
-    public LocalTransactionStepDefinition(BaseLocalTransactionEvent in, Optional<Supplier> process, 
+    public LocalTransactionStepDefinition(BaseLocalTransactionEvent in,Optional<List<String>> businessKey,Optional<Supplier> process, 
     		Stream<BaseTransactionCommand> send, Stream<BaseTransactionEvent> blow, 
     		ReceivedCommand receivedCommand, Optional<Consumer<String>> attach, 
     		ReceivedCommandGTX receivedCommandGTX, 
     		@NotNull WorkerMeta meta,CompensateWhen compensateWhen) {
-        super(in, process, send, blow, receivedCommand, attach, receivedCommandGTX,compensateWhen);
+        super(in,businessKey,process, send, blow, receivedCommand, attach, receivedCommandGTX,compensateWhen);
         this.meta = meta;
     }
 
@@ -47,6 +48,7 @@ public  class LocalTransactionStepDefinition<T extends BaseLocalTransactionEvent
 
     public static class LocalTransactionPipelineBuilder<T extends BaseLocalTransactionEvent> {
         private BaseLocalTransactionEvent in;
+        private Optional<List<String>> businessKey;
         private Optional<Supplier> process;
         private Stream<BaseTransactionCommand> send;
         private Stream<BaseTransactionEvent> blow;
@@ -62,6 +64,11 @@ public  class LocalTransactionStepDefinition<T extends BaseLocalTransactionEvent
 
         public LocalTransactionStepDefinition.LocalTransactionPipelineBuilder<T> in(BaseLocalTransactionEvent in) {
             this.in = in;
+            return this;
+        }
+        
+        public LocalTransactionStepDefinition.LocalTransactionPipelineBuilder<T> businessKey(Optional<List<String>>businessKey) {
+            this.businessKey = businessKey;
             return this;
         }
 
@@ -118,15 +125,18 @@ public  class LocalTransactionStepDefinition<T extends BaseLocalTransactionEvent
         }
         
         public LocalTransactionStepDefinition<T> build() {
-            return new LocalTransactionStepDefinition<T>(in, process, send, blow, receivedCommand, attach, receivedCommandGTX, meta,compensateWhen);
+            return new LocalTransactionStepDefinition<T>(in,businessKey,process, send, blow, receivedCommand, attach, receivedCommandGTX, meta,compensateWhen);
         }
 
 		@Override
 		public String toString() {
-			return "LocalTransactionPipelineBuilder [in=" + in + ", process=" + process + ", send=" + send + ", blow="
-					+ blow + ", meta=" + meta + ", receivedCommand=" + receivedCommand + ", attach=" + attach
-					+ ", receivedCommandGTX=" + receivedCommandGTX + ", compensateWhen=" + compensateWhen + "]";
+			return "LocalTransactionPipelineBuilder [in=" + in + ", businessKey=" + businessKey + ", process=" + process
+					+ ", send=" + send + ", blow=" + blow + ", meta=" + meta + ", receivedCommand=" + receivedCommand
+					+ ", attach=" + attach + ", receivedCommandGTX=" + receivedCommandGTX + ", compensateWhen="
+					+ compensateWhen + "]";
 		}
+
+		
 
         
     }

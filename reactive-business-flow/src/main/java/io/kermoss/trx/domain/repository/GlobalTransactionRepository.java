@@ -15,8 +15,10 @@ public interface GlobalTransactionRepository extends JpaRepository<GlobalTransac
     Optional<GlobalTransaction> findByParent(final String parentId);
     Optional<GlobalTransaction> findByNameAndParentAndStatus(final String name, final String parentId, final GlobalTransaction.GlobalTransactionStatus status);
     Optional<GlobalTransaction> findByNameAndParent(final String name, final String parentId);
-//    @Query("select gbtx from GlobalTransaction gbtx left join fetch gbtx.localTransactions ltx where gbtx.id =:id and ltx.name=:name")
-//    Optional<GlobalTransaction> findByIdAndLtxByName(@Param("id")final String id,@Param("name")final String name);
+    Optional<GlobalTransaction> findByLocalTransactions(final String name, final String parentId);
+
+    @Query("select gbtx from GlobalTransaction gbtx inner join fetch gbtx.localTransactions ltx where gbtx.id =:id and ltx.name=:name and ltx.bKey=:bKey")
+    Optional<GlobalTransaction> findByTsu(@Param("id")final String id,@Param("name")final String name,@Param("bKey")final Long bKey);
     
 }
  

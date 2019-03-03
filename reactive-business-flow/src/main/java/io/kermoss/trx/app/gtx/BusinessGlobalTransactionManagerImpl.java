@@ -49,7 +49,7 @@ public class BusinessGlobalTransactionManagerImpl implements BusinessGlobalTrans
 		Optional<RequestGlobalTransaction> orgt = globalTransactionMapper.mapTo(pipeline);
 
 		GlobalTransaction globalTransaction = businessGlobalTransactionService.participateToGlobalTransaction(orgt);
-
+		
 		// begin is only responsable to save
 		globalTransactionRepository.save(globalTransaction);
 

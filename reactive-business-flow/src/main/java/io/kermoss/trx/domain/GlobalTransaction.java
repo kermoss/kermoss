@@ -15,227 +15,225 @@ import javax.validation.constraints.NotNull;
 @Entity
 @Table(name = "KERMOSS_GTX")
 public class GlobalTransaction {
-    @Id
-    @GeneratedValue(generator = "uuid")
-    @GenericGenerator(name = "uuid", strategy = "uuid")
-    @Column(columnDefinition = "CHAR(32)")
-    private String id;
-    protected Long timestamp = new Date().getTime();
-    
-    @NotNull
-    private String name;
-    
-    private String parent;
-    
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "globalTransaction")
-    private Set<GlobalTransactionVariable> variables = new HashSet<>();
-    
-    @Enumerated(EnumType.STRING)
-    private GlobalTransactionStatus status = GlobalTransactionStatus.STARTED;
-    
-    @OneToMany(mappedBy="globalTransaction",cascade = CascadeType.ALL, orphanRemoval = true )
-    private List<LocalTransaction> localTransactions = new ArrayList<>();
-    
-    @Transient
-    private boolean isNew = false;
-    
-    private String traceId;
+	@Id
+	@GeneratedValue(generator = "uuid")
+	@GenericGenerator(name = "uuid", strategy = "uuid")
+	@Column(columnDefinition = "CHAR(32)")
+	private String id;
+	
+	protected Long timestamp = new Date().getTime();
 
-    @java.beans.ConstructorProperties({"id", "timestamp", "previous", "variables", "status", "localTransactions"})
-    public GlobalTransaction(String id, Long timestamp, GlobalTransaction previous, Set<GlobalTransactionVariable> variables, GlobalTransactionStatus status, List<LocalTransaction> localTransactions) {
-        this.id = id;
-        this.timestamp = timestamp;
-//        this.previous = previous;
-        this.variables = variables;
-        this.status = status;
-        this.localTransactions = localTransactions;
-    }
+	
 
-    GlobalTransaction() {
-    }
+	@NotNull
+	private String name;
 
-    public static GlobalTransactionBuilder builder() {
-        return new GlobalTransactionBuilder();
-    }
+	private String parent;
 
-    public void addLocalTransaction(final LocalTransaction localTransaction) {
-        if(this.localTransactions == null) {
-            this.localTransactions = new ArrayList<>();
-        }
-        this.localTransactions.add(localTransaction);
-    }
+	@OneToMany(cascade = CascadeType.ALL, mappedBy = "globalTransaction")
+	private Set<GlobalTransactionVariable> variables = new HashSet<>();
 
-    public void addVariable(final GlobalTransactionVariable variable) {
-        if(this.variables == null) {
-            this.variables = new HashSet<>();
-        }
-        this.variables.add(variable);
-    }
+	@Enumerated(EnumType.STRING)
+	private GlobalTransactionStatus status = GlobalTransactionStatus.STARTED;
 
-    public void addVariable(final String key, final String value) {
-        this.addVariable(
-            GlobalTransactionVariable.builder()
-                .key(key)
-                .value(value)
-                .build()
-        );
-    }
+	@OneToMany(mappedBy = "globalTransaction", cascade = CascadeType.ALL, orphanRemoval = true)
+	private List<LocalTransaction> localTransactions = new ArrayList<>();
 
-    public Optional<String> getVariableValue(final String key) {
-        return this.variables.stream()
-            .filter(v -> v.getKey().equals(key))
-            .map(GlobalTransactionVariable::getValue)
-            .findAny();
-    }
+	@Transient
+	private boolean isNew = false;
 
-    public String getId() {
-        return this.id;
-    }
+	private String traceId;
 
-    public Long getTimestamp() {
-        return this.timestamp;
-    }
+	@java.beans.ConstructorProperties({ "id", "timestamp", "variables", "status", "localTransactions" })
+	public GlobalTransaction(String id,  Long timestamp, Set<GlobalTransactionVariable> variables,
+			GlobalTransactionStatus status, List<LocalTransaction> localTransactions) {
+		this.id = id;
+		this.timestamp = timestamp;
+		this.variables = variables;
+		this.status = status;
+		this.localTransactions = localTransactions;
+	}
 
-//    public GlobalTransaction getPrevious() {
-//        return this.previous;
-//    }
+	GlobalTransaction() {
+	}
 
-    public Set<GlobalTransactionVariable> getVariables() {
-        return this.variables;
-    }
+	public static GlobalTransactionBuilder builder() {
+		return new GlobalTransactionBuilder();
+	}
 
-    public GlobalTransactionStatus getStatus() {
-        return this.status;
-    }
+	public void addLocalTransaction(final LocalTransaction localTransaction) {
+		if (this.localTransactions == null) {
+			this.localTransactions = new ArrayList<>();
+		}
+		this.localTransactions.add(localTransaction);
+	}
 
-    public List<LocalTransaction> getLocalTransactions() {
-        return this.localTransactions;
-    }
+	public void addVariable(final GlobalTransactionVariable variable) {
+		if (this.variables == null) {
+			this.variables = new HashSet<>();
+		}
+		this.variables.add(variable);
+	}
 
-    public void setId(String id) {
-        this.id = id;
-    }
+	public void addVariable(final String key, final String value) {
+		this.addVariable(GlobalTransactionVariable.builder().key(key).value(value).build());
+	}
 
-    public void setTimestamp(Long timestamp) {
-        this.timestamp = timestamp;
-    }
 
-//    public void setPrevious(GlobalTransaction previous) {
-//        this.previous = previous;
-//    }
+	public Optional<String> getVariableValue(final String key) {
+		return this.variables.stream().filter(v -> v.getKey().equals(key)).map(GlobalTransactionVariable::getValue)
+				.findAny();
+	}
 
-    public void setVariables(Set<GlobalTransactionVariable> variables) {
-        this.variables = variables;
-    }
+	public String getId() {
+		return this.id;
+	}
+     
+	
+	
+	public Long getTimestamp() {
+		return this.timestamp;
+	}
 
-    public void setStatus(GlobalTransactionStatus status) {
-        this.status = status;
-    }
 
-    public String getParent() {
-        return parent;
-    }
+	public Set<GlobalTransactionVariable> getVariables() {
+		return this.variables;
+	}
 
-    public void setParent(String parent) {
-        this.parent = parent;
-    }
+	public GlobalTransactionStatus getStatus() {
+		return this.status;
+	}
 
-    public boolean isNew() {
-        return isNew;
-    }
+	public List<LocalTransaction> getLocalTransactions() {
+		return this.localTransactions;
+	}
 
-    public void setNew(boolean aNew) {
-        isNew = aNew;
-    }
+	public void setId(String id) {
+		this.id = id;
+	}
 
-    public String getTraceId() {
-        return traceId;
-    }
+	public void setTimestamp(Long timestamp) {
+		this.timestamp = timestamp;
+	}
 
-    public void setTraceId(String traceId) {
-        this.traceId = traceId;
-    }
 
-    public void setLocalTransactions(List<LocalTransaction> localTransactions) {
-        this.localTransactions = localTransactions;
-    }
+	public void setVariables(Set<GlobalTransactionVariable> variables) {
+		this.variables = variables;
+	}
 
-    public static GlobalTransaction create(String name, String traceId){
-        GlobalTransaction gtx =  new GlobalTransaction();
-        gtx.setNew(true);
-        gtx.setName(name);
-        gtx.setTraceId(traceId);
-        return gtx;
-    }
+	public void setStatus(GlobalTransactionStatus status) {
+		this.status = status;
+	}
 
-    public enum GlobalTransactionStatus {
-        PREPARED,
-        STARTED,
-        COMITTED,
-        ROLLBACKED
-    }
+	public String getParent() {
+		return parent;
+	}
 
-    public String getName() {
-        return name;
-    }
+	public void setParent(String parent) {
+		this.parent = parent;
+	}
 
-    public void setName(String name) {
-        this.name = name;
-    }
+	public boolean isNew() {
+		return isNew;
+	}
 
-    public static class GlobalTransactionBuilder {
-        private String id;
-        private String name;
-        private Long timestamp;
-        private GlobalTransaction previous;
-        private Set<GlobalTransactionVariable> variables;
-        private GlobalTransactionStatus status;
-        private List<LocalTransaction> localTransactions;
+	public void setNew(boolean aNew) {
+		isNew = aNew;
+	}
 
-        GlobalTransactionBuilder() {
-        }
+	public String getTraceId() {
+		return traceId;
+	}
 
-        public GlobalTransaction.GlobalTransactionBuilder id(String id) {
-            this.id = id;
-            return this;
-        }
+	public void setTraceId(String traceId) {
+		this.traceId = traceId;
+	}
 
-        public GlobalTransaction.GlobalTransactionBuilder timestamp(Long timestamp) {
-            this.timestamp = timestamp;
-            return this;
-        }
+	public void setLocalTransactions(List<LocalTransaction> localTransactions) {
+		this.localTransactions = localTransactions;
+	}
 
-        public GlobalTransaction.GlobalTransactionBuilder previous(GlobalTransaction previous) {
-            this.previous = previous;
-            return this;
-        }
+	public static GlobalTransaction create(String name, String traceId) {
+		GlobalTransaction gtx = new GlobalTransaction();
+		gtx.setNew(true);
+		gtx.setName(name);
+		gtx.setTraceId(traceId);
+		return gtx;
+	}
 
-        public GlobalTransaction.GlobalTransactionBuilder variables(Set<GlobalTransactionVariable> variables) {
-            this.variables = variables;
-            return this;
-        }
+	public enum GlobalTransactionStatus {
+		PREPARED, STARTED, COMITTED, ROLLBACKED
+	}
 
-        public GlobalTransaction.GlobalTransactionBuilder status(GlobalTransactionStatus status) {
-            this.status = status;
-            return this;
-        }
+	public String getName() {
+		return name;
+	}
 
-        public GlobalTransaction.GlobalTransactionBuilder localTransactions(List<LocalTransaction> localTransactions) {
-            this.localTransactions = localTransactions;
-            return this;
-        }
+	public void setName(String name) {
+		this.name = name;
+	}
 
-        public GlobalTransaction.GlobalTransactionBuilder name(String name) {
-            this.name = name;
-            return this;
-        }
+	public static class GlobalTransactionBuilder {
+		private String id;
+		private Long bKey;
+		private String name;
+		private Long timestamp;
+		private GlobalTransaction previous;
+		private Set<GlobalTransactionVariable> variables;
+		private GlobalTransactionStatus status;
+		private List<LocalTransaction> localTransactions;
 
-        public GlobalTransaction build() {
-            return new GlobalTransaction(id, timestamp, previous, variables, status, localTransactions);
-        }
+		GlobalTransactionBuilder() {
+		}
 
-        public String toString() {
-            return "GlobalTransaction.GlobalTransactionBuilder(id=" + this.id + ", timestamp=" + this.timestamp + ", previous=" + this.previous + ", variables=" + this.variables + ", status=" + this.status + ", localTransactions=" + this.localTransactions + ")";
-        }
-    }
+		public GlobalTransaction.GlobalTransactionBuilder id(String id) {
+			this.id = id;
+			return this;
+		}
+
+		public GlobalTransaction.GlobalTransactionBuilder bKey(Long bKey) {
+			this.bKey = bKey;
+			return this;
+		}
+
+		public GlobalTransaction.GlobalTransactionBuilder timestamp(Long timestamp) {
+			this.timestamp = timestamp;
+			return this;
+		}
+
+		public GlobalTransaction.GlobalTransactionBuilder previous(GlobalTransaction previous) {
+			this.previous = previous;
+			return this;
+		}
+
+		public GlobalTransaction.GlobalTransactionBuilder variables(Set<GlobalTransactionVariable> variables) {
+			this.variables = variables;
+			return this;
+		}
+
+		public GlobalTransaction.GlobalTransactionBuilder status(GlobalTransactionStatus status) {
+			this.status = status;
+			return this;
+		}
+
+		public GlobalTransaction.GlobalTransactionBuilder localTransactions(List<LocalTransaction> localTransactions) {
+			this.localTransactions = localTransactions;
+			return this;
+		}
+
+		public GlobalTransaction.GlobalTransactionBuilder name(String name) {
+			this.name = name;
+			return this;
+		}
+
+		public GlobalTransaction build() {
+			return new GlobalTransaction(id, timestamp, variables, status, localTransactions);
+		}
+
+		public String toString() {
+			return "GlobalTransaction.GlobalTransactionBuilder(id=" + this.id + ", timestamp=" + this.timestamp
+					+ ", previous=" + this.previous + ", variables=" + this.variables + ", status=" + this.status
+					+ ", localTransactions=" + this.localTransactions + ")";
+		}
+	}
 }

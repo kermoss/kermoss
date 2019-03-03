@@ -1,5 +1,6 @@
 package io.kermoss.bfm.pipeline;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
@@ -19,7 +20,7 @@ public class GlobalTransactionStepDefinition<T extends BaseGlobalTransactionEven
 
 
     public GlobalTransactionStepDefinition(BaseGlobalTransactionEvent in, Optional<Supplier> process, Stream<BaseTransactionCommand> send, Stream<BaseTransactionEvent> blow, ReceivedCommand receivedCommand, Optional<Consumer<String>> attach, ReceivedCommandGTX receivedCommandGTX, WorkerMeta meta, Stream<BaseTransactionCommand> prepare,CompensateWhen compensateWhen) {
-        super(in, process, send, blow, receivedCommand, attach, receivedCommandGTX,compensateWhen);
+        super(in,null, process, send, blow, receivedCommand, attach, receivedCommandGTX,compensateWhen);
         this.meta = meta;
         this.prepare = prepare;
     }
@@ -47,7 +48,8 @@ public class GlobalTransactionStepDefinition<T extends BaseGlobalTransactionEven
     }
 
     public static class GlobalTransactionPipelineBuilder<T extends BaseGlobalTransactionEvent> {
-        private T in;
+        
+    	private T in;
         private Optional<Supplier> process;
         private Stream<BaseTransactionCommand> send;
         private Stream<BaseTransactionCommand> prepare;
@@ -66,6 +68,7 @@ public class GlobalTransactionStepDefinition<T extends BaseGlobalTransactionEven
             this.in = in;
             return this;
         }
+        
 
         public GlobalTransactionStepDefinition.GlobalTransactionPipelineBuilder<T> process(Optional<Supplier> process) {
             this.process = process;
@@ -123,7 +126,5 @@ public class GlobalTransactionStepDefinition<T extends BaseGlobalTransactionEven
 					+ receivedCommand + ", attach=" + attach + ", receivedCommandGTX=" + receivedCommandGTX
 					+ ", compensateWhen=" + compensateWhen + "]";
 		}
-
-       
     }
 }
