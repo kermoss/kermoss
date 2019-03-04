@@ -82,7 +82,7 @@ public class BusinessLocalTransactionManagerImplTest {
         verify(localTransactionStepDefinition, times(2)).accept(any());
     }
 
-    //@Test
+    @Test
     public void testBeginWhenGlobalTxExistAndLocalTxExist() {
         // Setup
         final LocalTransactionStepDefinition localTransactionStepDefinition = mock(LocalTransactionStepDefinition.class);
@@ -107,7 +107,7 @@ public class BusinessLocalTransactionManagerImplTest {
         verify(globalTransaction, never()).addLocalTransaction(any(LocalTransaction.class));
         verify(mockGlobalTransactionRepository, never()).save(any(GlobalTransaction.class));
         verify(businessLocalTransactionManagerImplUnderTest, never() ).updateLTX(any(LocalTransactionStepDefinition.class), any(LocalTransaction.class));
-        verify(businessLocalTransactionManagerImplUnderTest, never()).attachToParent(any(WorkerMeta.class), anyString(),null, any(LocalTransaction.class));
+        verify(businessLocalTransactionManagerImplUnderTest, never()).attachToParent(any(WorkerMeta.class), anyString(),Optional.of(anyList()), any(LocalTransaction.class));
         verify(localTransactionStepDefinition, times(1)).accept(any());
 
     }
@@ -336,7 +336,7 @@ public class BusinessLocalTransactionManagerImplTest {
 
     }
 
-    //@Test
+    @Test
     public void testAttachToParentWhenLocalTxExist() {
         // Setup
         final WorkerMeta meta = mock(WorkerMeta.class);
@@ -347,7 +347,7 @@ public class BusinessLocalTransactionManagerImplTest {
 
         when(meta.getChildOf()).thenReturn(childOf);
         when(mockGlobalTransactionRepository.findById(anyString())).thenReturn(Optional.of(mock(GlobalTransaction.class)));
-        doReturn(new ArrayList<>()).when(businessLocalTransactionManagerImplUnderTest).getLocalTransaction(anyString(), anyString());
+        doReturn(Optional.of(localTransaction)).when(businessLocalTransactionManagerImplUnderTest).getLocalTransaction(anyString(), anyString(),Optional.of(anyList()));
 
 
         // Run the test
