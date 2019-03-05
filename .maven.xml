@@ -18,6 +18,7 @@
           <activeByDefault>true</activeByDefault>
         </activation>
         <properties>
+          <gpg.defaultKeyring>false</gpg.defaultKeyring>
           <gpg.executable>${env.GPG_EXECUTABLE}</gpg.executable>
           <gpg.passphrase>${env.GPG_PASSPHRASE}</gpg.passphrase>
         </properties>
