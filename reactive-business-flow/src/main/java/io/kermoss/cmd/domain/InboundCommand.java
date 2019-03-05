@@ -24,6 +24,11 @@ public class InboundCommand extends AbstractCommand {
         this.status = status;
         this.refId = refId;
     }
+    
+    public InboundCommand( String subject, String source, String destination, String GTX, String LTX, String FLTX, String PGTX, String additionalHeaders, String payload, Status status, String traceId) {
+        super(subject, source, destination, GTX, LTX, FLTX, PGTX, additionalHeaders, payload, traceId);
+        this.status = status;
+    }
 
     public static InboundCommandBuilder builder() {
         return new InboundCommandBuilder();
@@ -78,10 +83,7 @@ public class InboundCommand extends AbstractCommand {
         FAILED
     }
 
-    public InboundCommand( String subject, String source, String destination, String GTX, String LTX, String FLTX, String PGTX, String additionalHeaders, String payload, Status status, String traceId) {
-        super(subject, source, destination, GTX, LTX, FLTX, PGTX, additionalHeaders, payload, traceId);
-        this.status = status;
-    }
+    
 
 
     public static class InboundCommandBuilder {
