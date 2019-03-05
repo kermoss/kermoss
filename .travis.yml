@@ -2,8 +2,20 @@ language: java
 sudo: true
 jdk:
  - oraclejdk8
+## export GPG details
+before_install:
+    - echo $GPG_SECRET_KEYS | base64 --decode | $GPG_EXECUTABLE --import
+    - echo $GPG_OWNERTRUST | base64 --decode | $GPG_EXECUTABLE --import-ownertrust
+    
 before_install:
   - chmod +x mvnw
-script: "./mvnw -pl '!saga-worker' clean install"
+install:
+    mvn --settings .maven.xml install -DskipTests=true -Dgpg.skip -Dmaven.javadoc.skip=true -B -V
+    
+script: "./mvnw -pl '!saga-worker' clean deploy --settings .maven.xml -B -U -Prelease"
+
+cache:
+    directories:
+        - ~/.m2/repository
 after_success:
   - bash <(curl -s https://codecov.io/bash)
