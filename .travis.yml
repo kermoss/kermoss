@@ -12,7 +12,7 @@ before_install:
 install:
     mvn --settings .maven.xml install -DskipTests=true -Dgpg.skip -Dmaven.javadoc.skip=true -B -V
     
-script: "./mvnw -pl '!saga-worker' clean install --settings .maven.xml -B -U"
+script: "./mvnw -pl '!saga-worker' clean deploy --settings .maven.xml -B -U -Prelease"
 
 cache:
     directories:
