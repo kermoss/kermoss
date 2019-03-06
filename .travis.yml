@@ -12,13 +12,6 @@ install:
     
 script: "./mvnw -pl '!saga-worker' clean deploy --settings .maven.xml -B -U -Prelease"
 
-#deploy:
-#  provider: script
-#  script: "./mvnw -pl '!saga-worker' clean deploy --settings .maven.xml -B -U -Prelease"
-#  skip_cleanup: true
-#  on:
-#    tags: true
-
 cache:
     directories:
         - ~/.m2/repository
