@@ -175,17 +175,17 @@
 			<build>
 				<plugins>
 				 <!-- To release to Maven central -->
-					<plugin>
-						<groupId>org.sonatype.plugins</groupId>
-						<artifactId>nexus-staging-maven-plugin</artifactId>
-						<version>1.6.8</version>
-						<extensions>true</extensions>
-						<configuration>
-							<serverid>ossrh</serverid>
-							<nexusurl>https://oss.sonatype.org/</nexusurl>
-							<autoreleaseafterclose>true</autoreleaseafterclose>
-						</configuration>
-					</plugin>
+<!-- 					<plugin> -->
+<!-- 						<groupId>org.sonatype.plugins</groupId> -->
+<!-- 						<artifactId>nexus-staging-maven-plugin</artifactId> -->
+<!-- 						<version>1.6.8</version> -->
+<!-- 						<extensions>true</extensions> -->
+<!-- 						<configuration> -->
+<!-- 							<serverid>ossrh</serverid> -->
+<!-- 							<nexusurl>https://oss.sonatype.org/</nexusurl> -->
+<!-- 							<autoreleaseafterclose>true</autoreleaseafterclose> -->
+<!-- 						</configuration> -->
+<!-- 					</plugin> -->
 					<!-- To generate javadoc -->
 					<plugin>
 						<groupId>org.apache.maven.plugins</groupId>
