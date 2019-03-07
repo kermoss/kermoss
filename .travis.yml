@@ -7,8 +7,8 @@ before_install:
     - echo $GPG_SECRET_KEYS | base64 --decode | $GPG_EXECUTABLE --import
     - echo $GPG_OWNERTRUST | base64 --decode | $GPG_EXECUTABLE --import-ownertrust
     - chmod +x mvnw
-install:
-    mvn --settings .maven.xml install -DskipTests=true -Dgpg.skip -Dmaven.javadoc.skip=true -B -V
+#install:
+#    mvn --settings .maven.xml install -DskipTests=true -Dgpg.skip -Dmaven.javadoc.skip=true -B -V
     
 script: "./mvnw -pl '!saga-worker' clean deploy --settings .maven.xml -B -U -Prelease"
 

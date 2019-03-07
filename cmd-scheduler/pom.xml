@@ -6,7 +6,7 @@
 	<parent>
 		<artifactId>reactive-business-flow-parent</artifactId>
 		<groupId>io.kermoss</groupId>
-		<version>0.0.1</version>
+		<version>0.0.1.RELEASE</version>
 	</parent>
 	<artifactId>cmd-scheduler</artifactId>
 

@@ -13,14 +13,14 @@
 
 	<groupId>io.kermoss</groupId>
 	<artifactId>reactive-business-flow-parent</artifactId>
-	<version>0.0.1</version>
+	<version>0.0.1.RELEASE</version>
 	<packaging>pom</packaging>
 
 	<name>reactive-business-flow-parent</name>
 	<description></description>
 
 	<properties>
-	    <gpg.defaultKeyring>false</gpg.defaultKeyring>
+		<gpg.defaultKeyring>false</gpg.defaultKeyring>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 		<java.version>1.8</java.version>
@@ -174,18 +174,18 @@
 			</activation>
 			<build>
 				<plugins>
-				 <!-- To release to Maven central -->
-<!-- 					<plugin> -->
-<!-- 						<groupId>org.sonatype.plugins</groupId> -->
-<!-- 						<artifactId>nexus-staging-maven-plugin</artifactId> -->
-<!-- 						<version>1.6.8</version> -->
-<!-- 						<extensions>true</extensions> -->
-<!-- 						<configuration> -->
-<!-- 							<serverid>ossrh</serverid> -->
-<!-- 							<nexusurl>https://oss.sonatype.org/</nexusurl> -->
-<!-- 							<autoreleaseafterclose>true</autoreleaseafterclose> -->
-<!-- 						</configuration> -->
-<!-- 					</plugin> -->
+					<!-- To release to Maven central -->
+					<plugin>
+						<groupId>org.sonatype.plugins</groupId>
+						<artifactId>nexus-staging-maven-plugin</artifactId>
+						<version>1.6.7</version>
+						<extensions>true</extensions>
+						<configuration>
+							<serverId>ossrh</serverId>
+							<nexusUrl>https://oss.sonatype.org/</nexusUrl>
+							<autoReleaseAfterClose>true</autoReleaseAfterClose>
+						</configuration>
+					</plugin>
 					<!-- To generate javadoc -->
 					<plugin>
 						<groupId>org.apache.maven.plugins</groupId>
