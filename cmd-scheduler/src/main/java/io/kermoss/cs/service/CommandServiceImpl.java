@@ -12,7 +12,7 @@ import java.util.Date;
 import java.util.List;
 
 @Service
-public final class CommandServiceImpl implements CommandService {
+public  class CommandServiceImpl implements CommandService {
     private final JdbcTemplate jdbcTemplate;
     private final Long maxCommandExecutionTime;
 
