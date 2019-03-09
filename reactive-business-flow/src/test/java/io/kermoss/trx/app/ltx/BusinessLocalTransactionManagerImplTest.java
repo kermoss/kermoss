@@ -6,6 +6,8 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.springframework.context.ApplicationEventPublisher;
 
+import io.kermoss.bfm.event.ErrorLocalOccured;
+import io.kermoss.bfm.event.ErrorOccured;
 import io.kermoss.bfm.pipeline.LocalTransactionStepDefinition;
 import io.kermoss.bfm.worker.WorkerMeta;
 import io.kermoss.cmd.app.CommandOrchestrator;
@@ -16,15 +18,18 @@ import io.kermoss.trx.app.ltx.BusinessLocalTransactionManagerImpl;
 import io.kermoss.trx.app.visitors.localtx.StepLocalTxVisitor;
 import io.kermoss.trx.domain.GlobalTransaction;
 import io.kermoss.trx.domain.LocalTransaction;
+import io.kermoss.trx.domain.LocalTransaction.LocalTransactionStatus;
 import io.kermoss.trx.domain.exception.BusinessGlobalTransactionNotFoundException;
 import io.kermoss.trx.domain.exception.BusinessLocalTransactionNotFoundException;
 import io.kermoss.trx.domain.repository.GlobalTransactionRepository;
+import wiremock.org.apache.commons.lang3.text.translate.NumericEntityUnescaper.OPTION;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Optional;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.*;
 import static org.mockito.MockitoAnnotations.initMocks;
@@ -458,5 +463,54 @@ public class BusinessLocalTransactionManagerImplTest {
 
         // Verify the results
         assertEquals(Optional.empty(), result);
+    }
+    
+    @Test
+    public void testMarkAsRollbacked() {
+    	final LocalTransactionStepDefinition localTransactionStepDefinition = mock(LocalTransactionStepDefinition.class);
+    	final LocalTransaction localTransaction = mock(LocalTransaction.class);
+    	when(localTransaction.getState()).thenReturn(LocalTransactionStatus.COMITTED);
+    	businessLocalTransactionManagerImplUnderTest.markAsRollbacked(localTransaction, localTransactionStepDefinition);
+        
+    	verify(localTransactionStepDefinition,times(2)).accept(any(StepLocalTxVisitor.class));
+    
+    }
+    
+    @Test
+    public void testRollBackForErrorLocalOccured() {
+    	final LocalTransactionStepDefinition localTransactionStepDefinition = mock(LocalTransactionStepDefinition.class);
+    	final GlobalTransaction globalTransaction = mock(GlobalTransaction.class);
+    	when(localTransactionStepDefinition.getMeta()).thenReturn(new WorkerMeta("XXX"));
+    	doReturn(Optional.of(globalTransaction)).when(businessLocalTransactionManagerImplUnderTest).getGlobalTransaction(localTransactionStepDefinition);
+    	LocalTransaction mock = mock(LocalTransaction.class);
+		doNothing().when(businessLocalTransactionManagerImplUnderTest).markAsRollbacked(mock, localTransactionStepDefinition);
+    	when(localTransactionStepDefinition.getIn()).thenReturn(new ErrorLocalOccured());
+    	doReturn(new ArrayList<>()).when(businessLocalTransactionManagerImplUnderTest).getLocalTransaction(anyString(),anyString());
+    	businessLocalTransactionManagerImplUnderTest.rollBack(localTransactionStepDefinition);
+    	
+    }
+    @Test
+    public void testRollBack() {
+    	final LocalTransactionStepDefinition localTransactionStepDefinition = mock(LocalTransactionStepDefinition.class);
+    	final GlobalTransaction globalTransaction = mock(GlobalTransaction.class);
+    	when(localTransactionStepDefinition.getMeta()).thenReturn(new WorkerMeta("XXX"));
+    	doReturn(Optional.of(globalTransaction)).when(businessLocalTransactionManagerImplUnderTest).getGlobalTransaction(localTransactionStepDefinition);
+    	LocalTransaction localTransaction = mock(LocalTransaction.class);
+		doNothing().when(businessLocalTransactionManagerImplUnderTest).markAsRollbacked(localTransaction, localTransactionStepDefinition);
+    	when(localTransactionStepDefinition.getIn()).thenReturn(new ErrorOccured());
+    	doReturn(Optional.of(localTransaction)).when(businessLocalTransactionManagerImplUnderTest).getLocalTransaction(anyString(),anyString(),Optional.ofNullable(any(ArrayList.class)));
+    	businessLocalTransactionManagerImplUnderTest.rollBack(localTransactionStepDefinition);
+    	
+    }
+    
+    @Test
+    public void testMarkAsRollbackedWithStateRollbacked() {
+    	final LocalTransactionStepDefinition localTransactionStepDefinition = mock(LocalTransactionStepDefinition.class);
+    	final LocalTransaction localTransaction = mock(LocalTransaction.class);
+    	when(localTransaction.getState()).thenReturn(LocalTransactionStatus.ROLLBACKED);
+    	businessLocalTransactionManagerImplUnderTest.markAsRollbacked(localTransaction, localTransactionStepDefinition);
+        
+    	verify(localTransactionStepDefinition,times(1)).accept(any(StepLocalTxVisitor.class));
+    
     }
 }
