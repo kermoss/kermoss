@@ -4,8 +4,6 @@ import javax.transaction.Transactional;
 
 import io.kermoss.bfm.event.BaseGlobalTransactionEvent;
 import io.kermoss.bfm.pipeline.GlobalTransactionStepDefinition;
-import io.kermoss.trx.app.annotation.BusinessGlobalTransactional;
-import io.kermoss.trx.app.annotation.CommitBusinessGlobalTransactional;
 
 @Transactional
 public abstract class GlobalTransactionWorker<F extends BaseGlobalTransactionEvent, T extends  BaseGlobalTransactionEvent> {
@@ -15,8 +13,11 @@ public abstract class GlobalTransactionWorker<F extends BaseGlobalTransactionEve
     ) {
         this.meta = meta;
     }
-    @BusinessGlobalTransactional
-    abstract public GlobalTransactionStepDefinition onStart(final F onStartEvent);
-    @CommitBusinessGlobalTransactional
-    abstract public GlobalTransactionStepDefinition onComplete(final T onCompleteEvent);
+    
+    public abstract  GlobalTransactionStepDefinition onStart(final F onStartEvent);
+    public abstract  GlobalTransactionStepDefinition onComplete(final T onCompleteEvent);
+    
+    public WorkerMeta getMeta() {
+		return meta;
+	}
 }

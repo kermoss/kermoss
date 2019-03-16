@@ -29,80 +29,72 @@ import io.kermoss.trx.app.annotation.RollBackBusinessLocalTransactional;
 import io.kermoss.trx.app.annotation.SwitchBusinessLocalTransactional;
 
 @Component
-@Profile({"single","shop"})
-public class ChefCookingServiceWorker extends LocalTransactionWorker<OrderPizzaPendingEvent, OrderPizzaCookedEvent,ErrorLocalOccured> {
-
-    
+@Profile({ "single", "shop" })
+public class ChefCookingServiceWorker
+		extends LocalTransactionWorker<OrderPizzaPendingEvent, OrderPizzaCookedEvent, ErrorLocalOccured> {
 
 	private static final Logger log = org.slf4j.LoggerFactory.getLogger(ChefCookingServiceWorker.class);
-    @Autowired
-    PizzaService pizzaService;
-    public ChefCookingServiceWorker() {
-        super(new WorkerMeta("MakingPizza", "OrderPizzaService"));
-    }
+	@Autowired
+	PizzaService pizzaService;
 
-    @Override
-    @BusinessLocalTransactional
-    public LocalTransactionStepDefinition onStart(OrderPizzaPendingEvent orderPizzaPendingEvent) {
-        List<String> businessKey= new ArrayList<>();
-        businessKey.add(orderPizzaPendingEvent.getCartID());
-    	return LocalTransactionStepDefinition.builder()
-                .in(orderPizzaPendingEvent)
-                .businessKey(Optional.of(businessKey))
-                .process(makePizzaSupplier(orderPizzaPendingEvent.getCartID()))
-                .blow(Stream.of(new BakingPizzaPendingEvent(orderPizzaPendingEvent.getCartID())))
-                .meta(this.meta)
-                .build();
-    }
+	public ChefCookingServiceWorker() {
+		super(new WorkerMeta("MakingPizza", "OrderPizzaService"));
+	}
 
-    @Override
-    @SwitchBusinessLocalTransactional
-    public LocalTransactionStepDefinition onNext(OrderPizzaCookedEvent orderPizzaCookedEvent) {
-    	List<String> businessKey= new ArrayList<>();
-        businessKey.add(orderPizzaCookedEvent.getCartId());
-        
-    	ToDilever b = new ToDilever("Some address", pizzaService.getOrders().get(orderPizzaCookedEvent.getCartId()).getPizzas()
-                .stream().map(Pizza::getName)
-                .collect(Collectors.toList()));
-        OrderPizzaReadyForShipmentCommand cmd = new OrderPizzaReadyForShipmentCommand("deliver-pizza", "",
-                b, "shippement-service");
-        
-        return LocalTransactionStepDefinition.builder()
-                .in(orderPizzaCookedEvent).
-                 businessKey(Optional.of(businessKey))
-                .process(makePizzaReadySupplier(orderPizzaCookedEvent.getCartId()))
-                .blow(Stream.of(new OrderPizzaReadyEvent(orderPizzaCookedEvent.getCartId())))
-                .send(Stream.of(cmd))
-                .meta(this.meta)
-                .build();
-    }
+	@Override
+	@BusinessLocalTransactional
+	public LocalTransactionStepDefinition onStart(OrderPizzaPendingEvent orderPizzaPendingEvent) {
+		List<String> businessKey = new ArrayList<>();
+		businessKey.add(orderPizzaPendingEvent.getCartID());
+		return LocalTransactionStepDefinition.builder().in(orderPizzaPendingEvent).businessKey(Optional.of(businessKey))
+				.process(makePizzaSupplier(orderPizzaPendingEvent.getCartID()))
+				.blow(Stream.of(new BakingPizzaPendingEvent(orderPizzaPendingEvent.getCartID()))).meta(this.meta)
+				.build();
+	}
 
-    private Optional<Supplier> makePizzaSupplier(String id){
-        log.info("Hey, I'll start cooking your pizza {} right now! ", id);
+	@Override
+	@SwitchBusinessLocalTransactional
+	public LocalTransactionStepDefinition onNext(OrderPizzaCookedEvent orderPizzaCookedEvent) {
+		List<String> businessKey = new ArrayList<>();
+		businessKey.add(orderPizzaCookedEvent.getCartId());
+		OrderPizzaReadyForShipmentCommand cmd = null;
+		if (pizzaService != null) {
+			ToDilever b = new ToDilever("Some address", pizzaService.getOrders().get(orderPizzaCookedEvent.getCartId())
+					.getPizzas().stream().map(Pizza::getName).collect(Collectors.toList()));
+			cmd = new OrderPizzaReadyForShipmentCommand("deliver-pizza", "", b, "shippement-service");
+		}
+		return LocalTransactionStepDefinition.builder().in(orderPizzaCookedEvent).businessKey(Optional.of(businessKey))
+				.process(makePizzaReadySupplier(orderPizzaCookedEvent.getCartId()))
+				.blow(Stream.of(new OrderPizzaReadyEvent(orderPizzaCookedEvent.getCartId()))).send(Stream.of(cmd))
+				.meta(this.meta).build();
+	}
 
-        Supplier s = () -> {
-            pizzaService.getOrders().get(id).getPizzas().stream().forEach(p -> {
-                p.setPizzaState(Pizza.PizzaState.AJINA);
-                log.info("You pizza status is {}", p.getPizzaState());
-            });
-            return null;
-        };
-        return Optional.of(s);
-    }
+	private Optional<Supplier> makePizzaSupplier(String id) {
+		log.info("Hey, I'll start cooking your pizza {} right now! ", id);
 
-    private Optional<Supplier> makePizzaReadySupplier(String id){
-        log.info("Hey, your pizza {} is ready! ", id);
+		Supplier s = () -> {
+			pizzaService.getOrders().get(id).getPizzas().stream().forEach(p -> {
+				p.setPizzaState(Pizza.PizzaState.AJINA);
+				log.info("You pizza status is {}", p.getPizzaState());
+			});
+			return null;
+		};
+		return Optional.of(s);
+	}
 
-        Supplier s = () -> {
-            pizzaService.getOrders().get(id).getPizzas().stream().forEach(p -> {
-                p.setPizzaState(Pizza.PizzaState.WAJDAT);
-                log.info("You pizza status is {}", p.getPizzaState());
+	private Optional<Supplier> makePizzaReadySupplier(String id) {
+		log.info("Hey, your pizza {} is ready! ", id);
 
-            });
-            return null;
-        };
-        return Optional.of(s);
-    }
+		Supplier s = () -> {
+			pizzaService.getOrders().get(id).getPizzas().stream().forEach(p -> {
+				p.setPizzaState(Pizza.PizzaState.WAJDAT);
+				log.info("You pizza status is {}", p.getPizzaState());
+
+			});
+			return null;
+		};
+		return Optional.of(s);
+	}
 
 	@Override
 	@RollBackBusinessLocalTransactional
