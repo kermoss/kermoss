@@ -22,12 +22,19 @@ public class BusinessFlowManagerValidator {
 	
 
 	@PostConstruct
-	void init() {
+	public void init() {
 		
 		trxBFMValidator.forEach(validator->validator.validate(trxBoundaries));
 		trxBoundaries.stream().filter(x->!x.isValidated()).forEach(x->{
 			throw new  BusinessFlowManagerValidatorException("the Business Transaction with class "+x.getClazz().getName()+" not attached "+ " to any Global or Local Business transaction " );
 		});
+	}
+
+
+
+
+	public void setTrxBFMValidator(List<TransactionBFMValidator> trxBFMValidator) {
+		this.trxBFMValidator = trxBFMValidator;
 	}
 
 	
