@@ -1,4 +1,5 @@
 # Kermoss: A Reactive Business Flow
+![KERMOSS-LOGO](images/KERMOSS-LOGO.png)
 
 [![Build Status](https://travis-ci.org/kermoss/kermoss.svg?branch=master)](https://travis-ci.org/kermoss/kermoss)
 [![codecov](https://codecov.io/gh/kermoss/kermoss/branch/master/graph/badge.svg)](https://codecov.io/gh/kermoss/kermoss)
