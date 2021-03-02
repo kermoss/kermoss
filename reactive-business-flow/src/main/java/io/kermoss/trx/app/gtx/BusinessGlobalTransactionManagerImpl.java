@@ -67,7 +67,8 @@ public class BusinessGlobalTransactionManagerImpl implements BusinessGlobalTrans
 		Optional<GlobalTransaction> gtx = businessGlobalTransactionService.retrieveGlobalTransaction(orgt);
 
 		gtx.ifPresent(globalTransaction -> {
-			if (globalTransaction.getStatus().equals(GlobalTransaction.GlobalTransactionStatus.STARTED)) {
+			if (globalTransaction.getStatus().equals(GlobalTransaction.GlobalTransactionStatus.STARTED)|| 
+					globalTransaction.getStatus().equals(GlobalTransaction.GlobalTransactionStatus.PREPARED)) {
 				globalTransaction.setStatus(GlobalTransaction.GlobalTransactionStatus.COMITTED);
 				this.globalTransactionRepository.save(globalTransaction);
 			}

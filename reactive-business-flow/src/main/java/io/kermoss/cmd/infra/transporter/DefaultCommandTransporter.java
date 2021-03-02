@@ -61,7 +61,7 @@ public class DefaultCommandTransporter extends AbstractCommandTransporter<Outbou
             final List<OutboundCommand.Status> whiteList = Arrays.asList(OutboundCommand.Status.STARTED, OutboundCommand.Status.FAILED);
             if(whiteList.contains(outboundCommand.getStatus())) {
                 final String source = environment.getProperty(
-                    "kermoss.serviceName",
+                    "kermoss.service-name",
                     environment.getProperty("spring.application.name")
                 );
                 outboundCommand.setSource(source);

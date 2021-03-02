@@ -1,6 +1,7 @@
 package io.kermoss.saga.market.worker;
 
 import java.util.Optional;
+import java.util.stream.Stream;
 
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
@@ -23,12 +24,12 @@ public class SellerServiceWorker extends GlobalTransactionWorker<PhoneRingingEve
     @Override
     @BusinessGlobalTransactional
     public GlobalTransactionStepDefinition onStart(PhoneRingingEvent phoneRingingEvent) {
-        return GlobalTransactionStepDefinition.builder()
+    	return GlobalTransactionStepDefinition.builder()
                 .in(phoneRingingEvent)
                 .process(Optional.of(() -> {
                     System.out.println("Your ingrendients are available!");
                     return null;
-                }))
+                })).blow(Stream.of(new HangOffEvent()))
                 .meta(this.meta)
                 .build();
     }

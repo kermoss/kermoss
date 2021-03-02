@@ -65,7 +65,7 @@ public class DefaultPrepareCommandTransporter extends AbstractCommandTransporter
             // if Prepared then deliver
             if(outboundCommand.getStatus().equals(OutboundCommand.Status.PREPARED)) {
                 final String source = environment.getProperty(
-                    "kermoss.serviceName",
+                    "kermoss.service-name",
                     environment.getProperty("spring.application.name")
                 );
                 outboundCommand.setSource(source);
@@ -76,17 +76,9 @@ public class DefaultPrepareCommandTransporter extends AbstractCommandTransporter
                 }
                 log.info("Success Transport Prepared Command over HTTP: {}", txLogger.printJsonObject(outboundCommand));
                 // This part is needed to change status of Global transaction from PREPARED to started
-                OutboundCommand command = OutboundCommand.builder()
-                    .subject(outboundCommand.getSubject())
-                    .gTX(outboundCommand.getGTX())
-                    .pGTX(outboundCommand.getPGTX())
-                    .lTX(outboundCommand.getLTX())
-                    .fLTX(outboundCommand.getFLTX())
-                    .destination(outboundCommand.getDestination())
-                    .trace(outboundCommand.getTraceId())
-                    .build();
+                
                 log.info("Changing OutboundCommand status from Prepared to Started: {}", txLogger.printJsonObject(outboundCommand));
-                commandOrchestrator.receive(command);
+                commandOrchestrator.receive(outboundCommand);
                 txLogger.logTransactionState(txstatus -> log.info( "Transaction {} for Prepared OutboundCommand: {}", txstatus, txLogger.printJsonObject(outboundCommand)));
 
             }

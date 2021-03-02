@@ -58,22 +58,20 @@ public class BusinessLocalTransactionManagerImpl implements BusinessLocalTransac
 		WorkerMeta meta = localTransactionStepDefinition.getMeta();
 		transaction.setName(meta.getTransactionName());
 		Optional<GlobalTransaction> globalTransaction = this.getGlobalTransaction(localTransactionStepDefinition);
-		globalTransaction.ifPresent(
-				gtx -> {
-					Optional businessKey = localTransactionStepDefinition.getBusinessKey();
-					Optional<LocalTransaction> existedLTX = this.getLocalTransaction(gtx.getId(), transaction.getName(),
-							businessKey);
-					if (!existedLTX.isPresent()) {
-						transaction.setGlobalTransaction(gtx);
-						this.attachToParent(meta, gtx.getId(), businessKey,
-								transaction);
-						this.updateLTX(localTransactionStepDefinition, transaction);
-						gtx.addLocalTransaction(transaction);
-						globalTransactionRepository.save(gtx);
-						localTransactionStepDefinition.accept(buildInnerLocalTxStep(Optional.of(transaction)));
+		globalTransaction.ifPresent(gtx -> {
+			Optional businessKey = localTransactionStepDefinition.getBusinessKey();
+			Optional<LocalTransaction> existedLTX = this.getLocalTransaction(gtx.getId(), transaction.getName(),
+					businessKey);
+			if (!existedLTX.isPresent()) {
+				transaction.setGlobalTransaction(gtx);
+				this.attachToParent(meta, gtx.getId(), businessKey, transaction);
+				this.updateLTX(localTransactionStepDefinition, transaction);
+				gtx.addLocalTransaction(transaction);
+				globalTransactionRepository.save(gtx);
+				localTransactionStepDefinition.accept(buildInnerLocalTxStep(Optional.of(transaction)));
 
-					}
-				});
+			}
+		});
 		globalTransaction
 				.orElseThrow(() -> new BusinessGlobalTransactionNotFoundException(localTransactionStepDefinition));
 		localTransactionStepDefinition.accept(buildOuterLocalTxStep(Optional.of(transaction)));
@@ -85,13 +83,11 @@ public class BusinessLocalTransactionManagerImpl implements BusinessLocalTransac
 			final LocalTransactionStepDefinition<? extends BaseTransactionEvent> localTransactionStepDefinition) {
 		Optional<GlobalTransaction> globalTransaction = this.getGlobalTransaction(localTransactionStepDefinition);
 
-		Optional<LocalTransaction> localTransaction = globalTransaction.map(
-				gtx -> {
-					Optional<List<String>> businessKey = localTransactionStepDefinition.getBusinessKey();
-					return getLocalTransaction(gtx.getId(), localTransactionStepDefinition.getMeta().getTransactionName(),
-							businessKey);
-				})
-				.orElseGet(() -> Optional.empty());
+		Optional<LocalTransaction> localTransaction = globalTransaction.map(gtx -> {
+			Optional<List<String>> businessKey = localTransactionStepDefinition.getBusinessKey();
+			return getLocalTransaction(gtx.getId(), localTransactionStepDefinition.getMeta().getTransactionName(),
+					businessKey);
+		}).orElseGet(() -> Optional.empty());
 
 		localTransaction.ifPresent(ltx -> {
 			if (ltx.getNestedLocalTransactions().stream().map(LocalTransaction::getState)
@@ -112,36 +108,37 @@ public class BusinessLocalTransactionManagerImpl implements BusinessLocalTransac
 		Optional<GlobalTransaction> globalTransaction = this.getGlobalTransaction(localTransactionStepDefinition);
 
 		if (localTransactionStepDefinition.getIn().getClass().equals(ErrorLocalOccured.class)) {
-			List<LocalTransaction> localTransactions = globalTransaction.map(gtx -> getLocalTransaction(gtx.getId(),
-					localTransactionStepDefinition.getMeta().getTransactionName())).get();
+			Optional<List<LocalTransaction>> optional = globalTransaction.map(gtx -> getLocalTransaction(gtx.getId(),
+					localTransactionStepDefinition.getMeta().getTransactionName()));
+			List<LocalTransaction> localTransactions = optional.isPresent() ? optional.get() : null;
 
 			if (localTransactions != null) {
-				localTransactions.forEach(ltx -> markAsRollbacked(ltx,localTransactionStepDefinition));
+				localTransactions.forEach(ltx -> markAsRollbacked(ltx, localTransactionStepDefinition));
 			}
 		} else {
 			Optional<LocalTransaction> localTransaction = globalTransaction.map(gtx -> getLocalTransaction(gtx.getId(),
 					localTransactionStepDefinition.getMeta().getTransactionName(),
 					localTransactionStepDefinition.getBusinessKey())).orElseGet(() -> Optional.empty());
 
-			localTransaction.ifPresent(ltx -> markAsRollbacked(ltx,localTransactionStepDefinition));
+			localTransaction.ifPresent(ltx -> markAsRollbacked(ltx, localTransactionStepDefinition));
 
 		}
 
 	}
-	
+
 	@Override
 	public Optional<GlobalTransaction> findGlobalTransaction(final String GTX) {
 		return this.globalTransactionRepository.findById(GTX);
 	}
-	
-	void markAsRollbacked(LocalTransaction ltx,LocalTransactionStepDefinition<? extends BaseTransactionEvent> localTransactionStepDefinition) {
+
+	void markAsRollbacked(LocalTransaction ltx,
+			LocalTransactionStepDefinition<? extends BaseTransactionEvent> localTransactionStepDefinition) {
 		if (!ltx.getState().equals(LocalTransaction.LocalTransactionStatus.ROLLBACKED)) {
 			ltx.setState(LocalTransaction.LocalTransactionStatus.ROLLBACKED);
 			localTransactionStepDefinition.accept(buildInnerLocalTxStep(Optional.of(ltx)));
 		}
 		localTransactionStepDefinition.accept(buildOuterLocalTxStep(Optional.of(ltx)));
 	}
-
 
 	StepLocalTxVisitor buildInnerLocalTxStep(Optional<LocalTransaction> localTransaction) {
 
