@@ -1,5 +1,6 @@
 package io.kermoss.bfm.validator;
 
+import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Optional;
 
@@ -35,6 +36,8 @@ public abstract class TransactionBFMValidator {
 			trxBoundary.setValidated(true);
 		}
 		
+		
+		
 	 
 		trxBoundaries.stream()
 				.filter(trx -> trxBoundary.getName().equals(trx.getChildOf())).forEach(x->{
@@ -43,4 +46,10 @@ public abstract class TransactionBFMValidator {
 				});
 	
 	}
+	
+	
+    protected boolean isAnnotationPresent(Method m , Class annotation) {
+    	boolean skipCheckingForBridgeMethods=m.isBridge();
+    	return m.isAnnotationPresent(annotation) || skipCheckingForBridgeMethods ;
+    }
 }

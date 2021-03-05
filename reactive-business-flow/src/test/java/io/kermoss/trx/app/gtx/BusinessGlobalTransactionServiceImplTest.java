@@ -1,39 +1,41 @@
 package io.kermoss.trx.app.gtx;
 
+import static org.junit.Assert.assertEquals;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Matchers.same;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.mockito.MockitoAnnotations.initMocks;
+import static org.powermock.api.mockito.PowerMockito.mockStatic;
+
+import java.util.Optional;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Answers;
 import org.mockito.Mock;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
-import org.springframework.cloud.sleuth.Span;
-import org.springframework.cloud.sleuth.Tracer;
 import org.springframework.context.ApplicationEventPublisher;
 
 import io.kermoss.cmd.domain.InboundCommand;
-import io.kermoss.infra.GtxSpanStarted;
-import io.kermoss.trx.app.gtx.BusinessGlobalTransactionServiceImpl;
-import io.kermoss.trx.app.gtx.RequestGlobalTransaction;
 import io.kermoss.trx.domain.GlobalTransaction;
 import io.kermoss.trx.domain.exception.BusinessGlobalTransactionInstableException;
 import io.kermoss.trx.domain.repository.GlobalTransactionRepository;
 
-import java.util.Optional;
 
-import static org.junit.Assert.assertEquals;
-import static org.mockito.Mockito.*;
-import static org.mockito.MockitoAnnotations.initMocks;
-import static org.powermock.api.mockito.PowerMockito.mockStatic;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest( GlobalTransaction.class )
 public class BusinessGlobalTransactionServiceImplTest {
 
-    @Mock()
-    private GlobalTransactionRepository mockGlobalTransactionRepository;
-    @Mock(answer = Answers.RETURNS_DEEP_STUBS)
-    private Tracer mockTracer;
+    @Mock
+    GlobalTransactionRepository mockGlobalTransactionRepository;
+    
     @Mock
     ApplicationEventPublisher mockPublisher;
 
@@ -42,7 +44,7 @@ public class BusinessGlobalTransactionServiceImplTest {
     @Before
     public void setUp() {
         initMocks(this);
-        businessGlobalTransactionServiceImplUnderTest = spy(new BusinessGlobalTransactionServiceImpl(mockGlobalTransactionRepository, mockTracer, mockPublisher));
+        businessGlobalTransactionServiceImplUnderTest = spy(new BusinessGlobalTransactionServiceImpl(mockGlobalTransactionRepository,null));
     }
 
     @Test
@@ -50,19 +52,34 @@ public class BusinessGlobalTransactionServiceImplTest {
         // Setup
         final String id = "id";
         final GlobalTransaction globalTransaction = mock(GlobalTransaction.class);
-        when(mockGlobalTransactionRepository.findOne(id)).thenReturn(globalTransaction);
+        Optional<GlobalTransaction> opt = Optional.of(globalTransaction);
+		when(mockGlobalTransactionRepository.findById(id)).thenReturn(opt);
+        
         // Run the test
         final Optional<GlobalTransaction> result = businessGlobalTransactionServiceImplUnderTest.findGlobalTransaction(id);
 
         // Verify the results
         assertEquals(Optional.of(globalTransaction), result);
     }
+    @Test
+    public void testFindGlobalTransactionWhenGlobalTxisNull() {
+        // Setup
+        final String id = "id";
+		when(mockGlobalTransactionRepository.findById(id)).thenReturn(null);
+        
+        // Run the test
+        final Optional<GlobalTransaction> result = businessGlobalTransactionServiceImplUnderTest.findGlobalTransaction(id);
+
+        // Verify the results
+        assertEquals(Optional.empty(), result);
+    }
 
     @Test
     public void testFindGlobalTransactionWhenGlobalTxNotExist() {
         // Setup
         final String id = "id";
-        when(mockGlobalTransactionRepository.findOne(id)).thenReturn(null);
+		when(mockGlobalTransactionRepository.findById(id)).thenReturn(Optional.empty());
+        
         // Run the test
         final Optional<GlobalTransaction> result = businessGlobalTransactionServiceImplUnderTest.findGlobalTransaction(id);
 
@@ -154,7 +171,8 @@ public class BusinessGlobalTransactionServiceImplTest {
 
         when(rgt.getParent()).thenReturn("parent");
         when(rgt.getGTX()).thenReturn("id");
-        when(mockGlobalTransactionRepository.findOne("id")).thenReturn(globalTransaction);
+        Optional<GlobalTransaction> opt = Optional.of(globalTransaction);
+		when(mockGlobalTransactionRepository.findById("id")).thenReturn(opt);
 
         // Run the test
         final Optional<GlobalTransaction> result = businessGlobalTransactionServiceImplUnderTest.retrieveGlobalTransaction(Optional.of(rgt));
@@ -173,7 +191,7 @@ public class BusinessGlobalTransactionServiceImplTest {
 
         when(rgt.getParent()).thenReturn(null);
         when(rgt.getGTX()).thenReturn("id");
-        when(mockGlobalTransactionRepository.findOne("id")).thenReturn(globalTransaction);
+        when(mockGlobalTransactionRepository.findById("id")).thenReturn(Optional.of(globalTransaction));
 
         // Run the test
         final Optional<GlobalTransaction> result = businessGlobalTransactionServiceImplUnderTest.retrieveGlobalTransaction(Optional.of(rgt));
@@ -241,67 +259,6 @@ public class BusinessGlobalTransactionServiceImplTest {
 
     }
 
-    @Test
-    public void testtraceWhenParentNull(){
-        // Setup
-        final RequestGlobalTransaction rgt = mock(RequestGlobalTransaction.class);
-        final String traceId = "traceId";
-
-        when(rgt.getTraceId()).thenReturn(traceId);
-        when(rgt.getParent()).thenReturn("parent");
-
-        // Run the test
-        String result = businessGlobalTransactionServiceImplUnderTest.trace(rgt);
-
-        // Verify the results
-        assertEquals(result, traceId);
-        verify(mockTracer, never()).createSpan(anyString());
-        verify(mockPublisher, never()).publishEvent(any(GtxSpanStarted.class));
-
-
-    }
-
-    @Test
-    public void testtraceWhenParentNotNullAndCurrentSpanNull(){
-        // Setup
-        final RequestGlobalTransaction rgt = mock(RequestGlobalTransaction.class);
-        final String traceId = "traceId";
-        final String spanName = "inParentGlobalTransaction";
-        final Span span = mock(Span.class);
-
-        when(rgt.getParent()).thenReturn(null);
-        when(mockTracer.getCurrentSpan()).thenReturn(null);
-        when(mockTracer.createSpan(spanName)).thenReturn(span);
-        when(span.traceIdString()).thenReturn(traceId);
-        // Run the test
-        String result = businessGlobalTransactionServiceImplUnderTest.trace(rgt);
-
-        // Verify the results
-        assertEquals(result, traceId);
-        verify(mockTracer, times(1)).createSpan(same(spanName));
-        verify(mockPublisher, times(1)).publishEvent(any(GtxSpanStarted.class));
-
-    }
-
-    @Test
-    public void testtraceWhenParentNotNullAndCurrentSpanNotNull(){
-        // Setup
-        final RequestGlobalTransaction rgt = mock(RequestGlobalTransaction.class);
-        final String traceId = "traceId";
-        final Span span = mock(Span.class);
-
-        when(rgt.getParent()).thenReturn(null);
-        when(mockTracer.getCurrentSpan()).thenReturn(span);
-        when(span.traceIdString()).thenReturn(traceId);
-        // Run the test
-        String result = businessGlobalTransactionServiceImplUnderTest.trace(rgt);
-
-        // Verify the results
-        assertEquals(result, traceId);
-        verify(mockTracer, never()).createSpan(anyString());
-        verify(mockPublisher, never()).publishEvent(any(GtxSpanStarted.class));
-
-    }
 
     private void setupStartTrx(RequestGlobalTransaction rgt, InboundCommand command, String traceId, String name, String parent, GlobalTransaction globalTransaction) {
         mockStatic(GlobalTransaction.class);
@@ -309,7 +266,6 @@ public class BusinessGlobalTransactionServiceImplTest {
         when(rgt.getCommandRequestor()).thenReturn(command);
         when(rgt.getParent()).thenReturn(parent);
         when(rgt.getName()).thenReturn(name);
-        when(businessGlobalTransactionServiceImplUnderTest.trace(rgt)).thenReturn(traceId);
-        when(GlobalTransaction.create(name, traceId)).thenReturn(globalTransaction);
+        when(GlobalTransaction.create(name,null)).thenReturn(globalTransaction);
     }
 }

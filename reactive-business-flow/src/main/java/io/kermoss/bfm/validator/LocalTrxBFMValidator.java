@@ -10,6 +10,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.stereotype.Component;
+import org.springframework.util.ClassUtils;
 
 import io.kermoss.bfm.event.BaseTransactionEvent;
 import io.kermoss.bfm.event.ErrorOccured;
@@ -22,7 +23,7 @@ import io.kermoss.trx.app.annotation.SwitchBusinessLocalTransactional;
 @Component
 public class LocalTrxBFMValidator extends TransactionBFMValidator{
 	private static final Logger LOGGER = LoggerFactory.getLogger(LocalTrxBFMValidator.class);
-	@Autowired
+	@Autowired(required = false)
 	private List<LocalTransactionWorker<? extends BaseTransactionEvent, ? extends BaseTransactionEvent, ? extends ErrorOccured>> ltxWorkers;		
 	
 	
@@ -30,46 +31,47 @@ public class LocalTrxBFMValidator extends TransactionBFMValidator{
 	
 
 	public void validate(List<TrxBoundary> trxBoundaries) {
+		if(ltxWorkers!=null)
 		ltxWorkers.forEach(w -> {
 			LocalTransactionWorker localTransactionWorker = null;
 
 			try {
-				localTransactionWorker = (LocalTransactionWorker) Class.forName(w.getClass().getName()).newInstance();
+				localTransactionWorker = (LocalTransactionWorker)  ClassUtils.getUserClass(w.getClass()).newInstance();
 				validateMeta(trxBoundaries,localTransactionWorker);
 
 				for (Method m : localTransactionWorker.getClass().getMethods()) {
-					boolean intresstingMethod = false;
+					boolean intrestingMethod = false;
 					if (m.getName().equals("onStart")) {
-						intresstingMethod = true;
-						if (AnnotationUtils.findAnnotation(m, BusinessLocalTransactional.class) == null) {
+						intrestingMethod = true;
+						if (!isAnnotationPresent(m,BusinessLocalTransactional.class)) {
 							throw new BusinessFlowManagerValidatorException(
 									"@BusinessLocalTransactional annotation must be present on method onStart of "
 											+ localTransactionWorker.getClass());
 						}
 					}
 					if (m.getName().equals("onNext")) {
-						intresstingMethod = true;
-						if (AnnotationUtils.findAnnotation(m, SwitchBusinessLocalTransactional.class) == null) {
+						intrestingMethod = true;
+						if (!isAnnotationPresent(m,SwitchBusinessLocalTransactional.class)) {
 							throw new BusinessFlowManagerValidatorException(
 									"@SwitchBusinessLocalTransactional annotation must be present on method onNext of "
 											+ localTransactionWorker.getClass());
 						}
 					}
 					if (m.getName().equals("onError")) {
-						intresstingMethod = true;
-						if (AnnotationUtils.findAnnotation(m, RollBackBusinessLocalTransactional.class) == null) {
+						intrestingMethod = true;
+						if (!isAnnotationPresent(m,RollBackBusinessLocalTransactional.class)) {
 							throw new BusinessFlowManagerValidatorException(
 									"@RollBackBusinessLocalTransactional annotation must be present on method onError of "
 											+ localTransactionWorker.getClass());
 						}
 					}
-					if (intresstingMethod) {
+					if (intrestingMethod) {
 						validateTrxStepDefinition(localTransactionWorker, m);
 					}
 				}
 
 			} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException
-					| NoSuchMethodException | SecurityException | InstantiationException | ClassNotFoundException e) {
+					| NoSuchMethodException | SecurityException | InstantiationException  e) {
 				LOGGER.error("", e);
 			}
 		});

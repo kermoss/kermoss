@@ -27,17 +27,9 @@ public class CommandRepositoryFake implements CommandRepository{
 		return null;
 	}
 
-	@Override
-	public List<AbstractCommand> findAll(Iterable<String> ids) {
-		// TODO Auto-generated method stub
-		return null;
-	}
+	
 
-	@Override
-	public <S extends AbstractCommand> List<S> save(Iterable<S> entities) {
-		// TODO Auto-generated method stub
-		return null;
-	}
+	
 
 	@Override
 	public void flush() {
@@ -111,11 +103,7 @@ public class CommandRepositoryFake implements CommandRepository{
 		return 0;
 	}
 
-	@Override
-	public void delete(String id) {
-		// TODO Auto-generated method stub
-		
-	}
+	
 
 	@Override
 	public void delete(AbstractCommand entity) {
@@ -123,11 +111,7 @@ public class CommandRepositoryFake implements CommandRepository{
 		
 	}
 
-	@Override
-	public void delete(Iterable<? extends AbstractCommand> entities) {
-		// TODO Auto-generated method stub
-		
-	}
+	
 
 	@Override
 	public void deleteAll() {
@@ -135,11 +119,7 @@ public class CommandRepositoryFake implements CommandRepository{
 		
 	}
 
-	@Override
-	public <S extends AbstractCommand> S findOne(Example<S> example) {
-		// TODO Auto-generated method stub
-		return null;
-	}
+	
 
 	@Override
 	public <S extends AbstractCommand> Page<S> findAll(Example<S> example, Pageable pageable) {
@@ -197,6 +177,48 @@ public class CommandRepositoryFake implements CommandRepository{
 
 	@Override
 	public List<InboundCommand> failedInboundCommands() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public List<AbstractCommand> findAllById(Iterable<String> ids) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public <S extends AbstractCommand> List<S> saveAll(Iterable<S> entities) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public Optional<AbstractCommand> findById(String id) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public boolean existsById(String id) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override
+	public void deleteById(String id) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void deleteAll(Iterable<? extends AbstractCommand> entities) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public <S extends AbstractCommand> Optional<S> findOne(Example<S> example) {
 		// TODO Auto-generated method stub
 		return null;
 	}

@@ -24,7 +24,7 @@ import io.kermoss.trx.app.annotation.RollBackBusinessLocalTransactional;
 import io.kermoss.trx.app.annotation.SwitchBusinessLocalTransactional;
 
 @Component
-@Profile({"single","shop"})
+@Profile({"single","shop","test"})
 public class ChefPayDeliveryServiceWorker extends LocalTransactionWorker<DeliveryBillArrivedEvent, DeliveryBillPayed,PizzaRejectedEvent> {
 
 	private static final Logger log = org.slf4j.LoggerFactory.getLogger(ChefPayDeliveryServiceWorker.class);

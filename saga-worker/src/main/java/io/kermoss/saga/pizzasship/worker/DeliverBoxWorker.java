@@ -16,7 +16,7 @@ import io.kermoss.trx.app.annotation.BusinessGlobalTransactional;
 import io.kermoss.trx.app.annotation.CommitBusinessGlobalTransactional;
 
 @Component
-@Profile({"single","ship"})
+@Profile({"single","ship","test"})
 public class DeliverBoxWorker extends GlobalTransactionWorker<BoxArrivedEvent, BoxDelivredEvent> {
 
     public DeliverBoxWorker() {

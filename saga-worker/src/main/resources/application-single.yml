@@ -8,7 +8,7 @@ app:
 kermoss:
   service-name: pizza-shop 
   transport:
-    default-layer: kafka
+    default-layer: http
     kafka:
       consumer:
          group-name: ${kermoss.service-name}       

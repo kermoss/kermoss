@@ -29,7 +29,7 @@ import io.kermoss.trx.app.annotation.RollBackBusinessLocalTransactional;
 import io.kermoss.trx.app.annotation.SwitchBusinessLocalTransactional;
 
 @Component
-@Profile({ "single", "shop" })
+@Profile({ "single", "shop","test" })
 public class ChefCookingServiceWorker
 		extends LocalTransactionWorker<OrderPizzaPendingEvent, OrderPizzaCookedEvent, ErrorLocalOccured> {
 

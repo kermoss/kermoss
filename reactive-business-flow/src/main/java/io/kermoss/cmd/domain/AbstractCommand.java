@@ -14,8 +14,8 @@ import java.util.Date;
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 @DiscriminatorColumn(name="pool")
 @Table(name="KERMOSS_CMD", indexes = {
-    @Index(name = "index_status", columnList = "status"),
-    @Index(name = "index_s_timestamp", columnList = "startedTimestamp")
+    @Index(columnList = "status"),
+    @Index(columnList = "startedTimestamp")
 })
 public abstract class AbstractCommand extends Message{
     private String subject;

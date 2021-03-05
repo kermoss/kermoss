@@ -26,7 +26,6 @@ import io.kermoss.cmd.domain.OutboundCommand;
 import io.kermoss.cmd.domain.event.OutboundCommandStarted;
 import io.kermoss.cmd.domain.repository.CommandRepository;
 import io.kermoss.cmd.infra.transporter.strategies.CommandTransporterStrategy;
-import io.kermoss.infra.KermossTracer;
 import io.kermoss.infra.KermossTxLogger;
 
 public class DefaultRestCommandTransporterTest {
@@ -37,8 +36,7 @@ public class DefaultRestCommandTransporterTest {
     private CommandRepository mockCommandRepository;
     @Mock
     private Environment mockEnvironment;
-    @Mock
-    private KermossTracer mockTracer;
+
     @Mock
     private CommandTransporterStrategy mockStrategy;
     @Mock
@@ -50,7 +48,7 @@ public class DefaultRestCommandTransporterTest {
     @Before
     public void setUp() {
         initMocks(this);
-        defaultCommandTransporter= new DefaultCommandTransporter(mockPublisher, mockCommandRepository, mockEnvironment, mockTracer, mockStrategy, txLogger);
+        defaultCommandTransporter= new DefaultCommandTransporter(mockPublisher, mockCommandRepository, mockEnvironment,  mockStrategy, txLogger);
     }
 
     @Test
@@ -189,12 +187,11 @@ public class DefaultRestCommandTransporterTest {
         when(event.getMeta()).thenReturn(meta);
         when(mockCommandRepository.findOutboundCommandOpt(anyString())).thenReturn(Optional.of(command));
         when(command.getStatus()).thenReturn(OutboundCommand.Status.STARTED);
-        when(mockEnvironment.getProperty(same("kermoss.serviceName"), anyString())).thenReturn("source");
+        when(mockEnvironment.getProperty(same("kermoss.service-name"), anyString())).thenReturn("source");
     }
 
     private void verifyTheCommonResults(OutboundCommand command) {
-        verify(mockTracer).startGtxSpan(anyString(), anyString(), anyString(), any());
-        verify(mockEnvironment).getProperty(same("kermoss.serviceName"), anyString());
+        verify(mockEnvironment).getProperty(same("kermoss.service-name"), anyString());
         verify(command).setSource(same("source"));
         verify(mockCommandRepository).save(command);
     }

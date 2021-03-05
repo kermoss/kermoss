@@ -1,5 +1,8 @@
 package io.kermoss.cmd.infra.transporter;
 
+import java.util.Arrays;
+import java.util.List;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,11 +19,7 @@ import io.kermoss.cmd.domain.OutboundCommand;
 import io.kermoss.cmd.domain.event.OutboundCommandStarted;
 import io.kermoss.cmd.domain.repository.CommandRepository;
 import io.kermoss.cmd.infra.transporter.strategies.CommandTransporterStrategy;
-import io.kermoss.infra.KermossTracer;
 import io.kermoss.infra.KermossTxLogger;
-
-import java.util.Arrays;
-import java.util.List;
 
 @Service
 public class DefaultCommandTransporter extends AbstractCommandTransporter<OutboundCommandStarted>  {
@@ -28,7 +27,6 @@ public class DefaultCommandTransporter extends AbstractCommandTransporter<Outbou
     private final CommandRepository commandRepository;
     private final Environment environment;
     private final CommandTransporterStrategy strategy;
-    private final KermossTracer tracer;
     private final KermossTxLogger txLogger;
 
 
@@ -37,14 +35,12 @@ public class DefaultCommandTransporter extends AbstractCommandTransporter<Outbou
         final ApplicationEventPublisher publisher,
         final CommandRepository commandRepository,
         final Environment environment,
-        final KermossTracer tracer,
         final CommandTransporterStrategy strategy,
         final KermossTxLogger txLogger
     ) {
         super(publisher);
         this.commandRepository = commandRepository;
         this.environment = environment;
-        this.tracer = tracer;
         this.strategy = strategy;
         this.txLogger = txLogger;
     }
@@ -56,7 +52,6 @@ public class DefaultCommandTransporter extends AbstractCommandTransporter<Outbou
     public void onEvent(final OutboundCommandStarted event) {
         log.info("Start Transport Event {}:{}", event.getId(), event.getMeta().getSubject());
         //the tracer must be closed (transaction completed) see KERMOSS Transaction eventListener
-        tracer.startGtxSpan("Transporting OC of "+event.getMeta().getSubject(),event.getId(), event.getMeta().getTraceId(), tracer.currentSpan());
         this.commandRepository.findOutboundCommandOpt(event.getMeta().getCommandId()).ifPresent(outboundCommand -> {
             final List<OutboundCommand.Status> whiteList = Arrays.asList(OutboundCommand.Status.STARTED, OutboundCommand.Status.FAILED);
             if(whiteList.contains(outboundCommand.getStatus())) {

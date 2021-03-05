@@ -139,11 +139,11 @@ public class DefaultPrepareCommandTransporterTest {
         when(event.getMeta()).thenReturn(meta);
         when(mockCommandRepository.findOutboundCommandOpt(anyString())).thenReturn(Optional.of(command));
         when(command.getStatus()).thenReturn(OutboundCommand.Status.PREPARED);
-        when(mockEnvironment.getProperty(same("kermoss.serviceName"), anyString())).thenReturn("source");
+        when(mockEnvironment.getProperty(same("kermoss.service-name"), anyString())).thenReturn("source");
     }
 
     private void verifyTheCommonResults(OutboundCommand command) {
-        verify(mockEnvironment).getProperty(same("kermoss.serviceName"), anyString());
+        verify(mockEnvironment).getProperty(same("kermoss.service-name"), anyString());
         verify(command).setSource(same("source"));
     }
 }

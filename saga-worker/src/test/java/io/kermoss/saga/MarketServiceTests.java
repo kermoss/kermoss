@@ -54,7 +54,7 @@ public class MarketServiceTests extends KermossIT {
 
     @Test
     public void verifySellerServiceStatus(){
-        assertEquals(sellerService.getStatus().name() , "STARTED");
+        assertEquals(sellerService.getStatus().name() , "COMITTED");
     }
 
 

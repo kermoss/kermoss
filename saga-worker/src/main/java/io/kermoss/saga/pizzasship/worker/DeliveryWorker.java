@@ -23,7 +23,7 @@ import io.kermoss.trx.app.annotation.RollBackBusinessLocalTransactional;
 import io.kermoss.trx.app.annotation.SwitchBusinessLocalTransactional;
 
 @Component
-@Profile({"single","ship"})
+@Profile({"single","ship","test"})
 public class DeliveryWorker extends LocalTransactionWorker<BoxDeliverProcessingEvent, BoxDeliverFinishedEvent,ErrorLocalOccured> {
 
     private static final Logger log = LoggerFactory.getLogger(DeliveryWorker.class);
@@ -46,7 +46,7 @@ public class DeliveryWorker extends LocalTransactionWorker<BoxDeliverProcessingE
     @SwitchBusinessLocalTransactional
     public LocalTransactionStepDefinition onNext(BoxDeliverFinishedEvent onNextEvent) {
 
-    	PayBillCommand cmd = new PayBillCommand("pay-delivery-service", "",new Bill(1000, "WAFA1234")
+    	PayBillCommand cmd = new PayBillCommand("pay-delivery-service", "",new Bill(1, "WAFA1234")
                 , "pizza-shop");
         return LocalTransactionStepDefinition.builder()
                 .in(onNextEvent)

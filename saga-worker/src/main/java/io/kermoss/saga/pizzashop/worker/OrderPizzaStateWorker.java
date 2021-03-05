@@ -22,7 +22,7 @@ import io.kermoss.trx.app.annotation.BusinessGlobalTransactional;
 import io.kermoss.trx.app.annotation.CommitBusinessGlobalTransactional;
 
 @Component
-@Profile({"single","shop"})
+@Profile({"single","shop","test"})
 public class OrderPizzaStateWorker extends GlobalTransactionWorker<OrderPizzaReceivedEvent, OrderPizzaReadyEvent> {
     @Autowired
     PizzaService pizzaService;

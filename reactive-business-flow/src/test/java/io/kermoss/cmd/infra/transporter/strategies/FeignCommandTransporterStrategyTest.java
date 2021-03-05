@@ -1,9 +1,13 @@
 package io.kermoss.cmd.infra.transporter.strategies;
 
-import feign.Client;
-import feign.Response;
-import io.kermoss.cmd.domain.TransporterCommand;
-import io.kermoss.cmd.infra.transporter.strategies.FeignCommandTransporterStrategy;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import java.nio.charset.Charset;
+import java.util.HashMap;
+import java.util.function.BiFunction;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -11,13 +15,11 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
-import java.util.HashMap;
-import java.util.function.BiFunction;
-
-import static org.junit.Assert.*;
-import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import feign.Client;
+import feign.Request;
+import feign.Request.HttpMethod;
+import feign.Response;
+import io.kermoss.cmd.domain.TransporterCommand;
 
 @RunWith(MockitoJUnitRunner.class)
 public class FeignCommandTransporterStrategyTest {
@@ -33,7 +35,7 @@ public class FeignCommandTransporterStrategyTest {
     @Test
     public void transportCommandShouldSendPostRequest() {
         final TransporterCommand command = new TransporterCommand();
-        final Response response = Response.builder().status(202).headers(new HashMap<>()).build();
+        final Response response = Response.builder().request(Request.create(HttpMethod.POST,"/", new HashMap<>(), "".getBytes(),Charset.defaultCharset())).status(202).headers(new HashMap<>()).build();
 
         when(clientFactory.apply(any(), any())).thenReturn(client);
         when(client.postCommand(any())).thenReturn(response);
@@ -46,7 +48,7 @@ public class FeignCommandTransporterStrategyTest {
     @Test
     public void transportCommandReturnsTrueWhenPostRequestSucceeds() {
         final TransporterCommand command = new TransporterCommand();
-        final Response response = Response.builder().status(202).headers(new HashMap<>()).build();
+        final Response response = Response.builder().request(Request.create(HttpMethod.POST,"/", new HashMap<>(), "".getBytes(),Charset.defaultCharset())).status(202).headers(new HashMap<>()).build();
 
         when(clientFactory.apply(any(), any())).thenReturn(client);
         when(client.postCommand(any())).thenReturn(response);

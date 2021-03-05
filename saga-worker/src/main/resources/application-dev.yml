@@ -1,33 +1,23 @@
-# Oracle settings
 spring.datasource:
   url: jdbc:postgresql://localhost:5432/pizzashop
   username: postgres
   password: mysecretpassword
   driver-class-name: org.postgresql.Driver
+  hikari:      #when using http as default layer the minimun of max pool size is 10
+      # when using kafka as default layer the minimum of max pool size is 5
+      maximum-pool-size: 10
 
 
 # Hibernate settings
 spring.jpa.show-sql: true
-spring.jpa.hibernate.ddl-auto: create-drop
+spring.jpa.hibernate.ddl-auto: create
 spring.jpa.properties.hibernate.dialect: org.hibernate.dialect.PostgreSQLDialect
-spring.jpa.properties.hibernate.hbm2ddl.auto: create-drop
+spring.jpa.properties.hibernate.hbm2ddl.auto: create
 
-# HikariCP settings
-# spring.datasource.hikari.*
-spring.datasource.hikari:
-  connection-timeout: 60000
-  maximum-pool-size: 5
-                   
-
+     
 logging.level.org.springframework.transaction: ERROR
 
 ribbon:
   eureka:
     enabled: false
   listOfServers: localhost:8081
----
-spring:
-  sleuth:
-    enabled: true
-  zipkin:
-    enabled: false

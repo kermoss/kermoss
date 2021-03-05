@@ -5,21 +5,13 @@ import static org.junit.Assert.assertEquals;
 import javax.transaction.Transactional;
 
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.context.embedded.LocalServerPort;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.web.server.LocalServerPort;
 import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.TestPropertySource;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.web.client.RestTemplate;
 
-import io.kermoss.SagaReactiveBusinessFlowApplication;
 import io.kermoss.cmd.domain.CommandMeta;
 import io.kermoss.cmd.domain.OutboundCommand;
 import io.kermoss.cmd.domain.TransporterCommand;
@@ -109,7 +101,7 @@ public class CommandTransportIntegrationTest extends KermossIT{
 
         final Long commandsCount = commandRepository.count();
 
-        assertEquals(new Long(9L), commandsCount);
+        assertEquals(new Long(7L), commandsCount);
     }
 
     private TransporterCommand transform(OutboundCommand outcmd){

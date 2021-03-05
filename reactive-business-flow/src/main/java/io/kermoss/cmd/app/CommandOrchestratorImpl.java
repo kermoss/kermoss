@@ -1,5 +1,16 @@
 package io.kermoss.cmd.app;
 
+import java.util.Optional;
+import java.util.function.Consumer;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.core.env.Environment;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -19,19 +30,8 @@ import io.kermoss.infra.BubbleCache;
 import io.kermoss.infra.BubbleMessage;
 import io.kermoss.infra.KermossTxLogger;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.core.env.Environment;
-import org.springframework.stereotype.Service;
-
-import javax.transaction.Transactional;
-import java.util.Optional;
-import java.util.function.Consumer;
-
 @Service
-@Transactional
+
 public class CommandOrchestratorImpl implements CommandOrchestrator {
 
     private static final Logger log = LoggerFactory.getLogger(CommandOrchestratorImpl.class);
@@ -72,6 +72,7 @@ public class CommandOrchestratorImpl implements CommandOrchestrator {
         consumer.accept(persistedCommand.buildMeta());
     }
 
+    @Transactional
     @Override
     public void receive(final InboundCommand command) {
         txLogger.logTransactionState(txstatus -> log.info( "Transaction {} for InboundCommand: {}", txstatus, txLogger.printJsonObject(command)));
@@ -81,6 +82,7 @@ public class CommandOrchestratorImpl implements CommandOrchestrator {
         );
     }
 
+    @Transactional
     @Override
     public void receive(final OutboundCommand command) {
         AbstractCommand cmd = this.setCommandSource(command);
@@ -90,7 +92,7 @@ public class CommandOrchestratorImpl implements CommandOrchestrator {
                 (meta) -> this.publisher.publishEvent(new OutboundCommandStarted(meta))
         );
     }
-
+    @Transactional
     @Override
     public void receive(BaseTransactionCommand command) {
         AbstractCommand cmd = this.setCommandSource(this.commandMapper(command));
@@ -100,7 +102,7 @@ public class CommandOrchestratorImpl implements CommandOrchestrator {
                 (meta) -> this.publisher.publishEvent(new OutboundCommandStarted(meta))
         );
     }
-
+    @Transactional
     @Override
     public void prepare(BaseTransactionCommand command) {
         OutboundCommand obc = this.commandMapper(command);
@@ -112,7 +114,7 @@ public class CommandOrchestratorImpl implements CommandOrchestrator {
                 (meta) -> this.publisher.publishEvent(new OutboundCommandPrepared(obc.buildMeta()))
         );
     }
-
+    @Transactional
     @Override
     public void prepare(InboundCommand command) {
         command.setStatus(InboundCommand.Status.PREPARED);
@@ -124,14 +126,22 @@ public class CommandOrchestratorImpl implements CommandOrchestrator {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public boolean isInboundCommandExist(String refId) {
         if (commandRepository.findByRefId(refId).isPresent()){
             return true;
         }
         return false;
     }
+    
+    @Transactional(readOnly = true)
+    public  Optional<OutboundCommand> findOutboundCommandOpt(final String id) {
+		return Optional.ofNullable(commandRepository.findOutboundCommand(id));
+	}
+    
 
     @Override
+    @Transactional(readOnly = true)
     public boolean isInboundCommandWithStatusExist(String refId, InboundCommand.Status status) {
         if (commandRepository.findByIdAndStatus(refId, status).isPresent()){
             return true;
@@ -140,6 +150,7 @@ public class CommandOrchestratorImpl implements CommandOrchestrator {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public <P> Optional<P> retreive(String eventId, Class<P> target){
         Optional<P> payload = Optional.empty();
 

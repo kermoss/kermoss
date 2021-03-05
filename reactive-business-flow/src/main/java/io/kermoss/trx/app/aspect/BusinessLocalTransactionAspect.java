@@ -4,11 +4,9 @@ import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Pointcut;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import io.kermoss.bfm.pipeline.LocalTransactionStepDefinition;
-import io.kermoss.infra.KermossTracer;
 import io.kermoss.trx.app.exception.PoincutDefinitionException;
 import io.kermoss.trx.app.ltx.BusinessLocalTransactionManager;
 
@@ -16,8 +14,7 @@ import io.kermoss.trx.app.ltx.BusinessLocalTransactionManager;
 @Component
 public class BusinessLocalTransactionAspect {
 	
-	@Autowired
-	KermossTracer tracer;
+	
 
     final BusinessLocalTransactionManager businessLocalTransactionManager;
 

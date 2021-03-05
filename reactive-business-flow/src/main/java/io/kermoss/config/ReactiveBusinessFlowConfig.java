@@ -2,6 +2,7 @@ package io.kermoss.config;
 
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.cloud.client.loadbalancer.LoadBalanced;
+import org.springframework.cloud.openfeign.EnableFeignClients;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Condition;
 import org.springframework.context.annotation.ConditionContext;
@@ -21,6 +22,7 @@ import io.kermoss.props.KermossProperties;
 import io.kermoss.props.Layer;
 
 @Configuration
+@EnableFeignClients
 public class ReactiveBusinessFlowConfig {
 
 	@Bean
