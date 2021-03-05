@@ -43,8 +43,17 @@
 			<artifactId>spring-cloud-starter-openfeign</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>org.springframework.cloud</groupId>
-			<artifactId>spring-cloud-starter-netflix-ribbon</artifactId>
+			<groupId>io.github.openfeign</groupId>
+			<artifactId>feign-okhttp</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>io.github.openfeign</groupId>
+			<artifactId>feign-httpclient</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>javax.validation</groupId>
+			<artifactId>validation-api</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -84,11 +93,12 @@
 			<optional>true</optional>
 		</dependency>
 
-<!-- 		<dependency> -->
-<!-- 			<groupId>org.springframework.boot</groupId> -->
-<!-- 			<artifactId>spring-boot-starter-test</artifactId> -->
-<!-- 			<scope>test</scope> -->
-<!-- 		</dependency> -->
+
+		<!-- <dependency> -->
+		<!-- <groupId>org.springframework.boot</groupId> -->
+		<!-- <artifactId>spring-boot-starter-test</artifactId> -->
+		<!-- <scope>test</scope> -->
+		<!-- </dependency> -->
 
 		<dependency>
 			<groupId>com.netflix.feign</groupId>

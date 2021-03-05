@@ -6,8 +6,11 @@ app:
   host: http://localhost:${server.port}
 
 kermoss:
-  service-name: pizza-shop 
+  service-name: pizza-shop
+   
   transport:
+    broker-mode:
+      prepared-request-use: http  
     default-layer: http
     kafka:
       consumer:

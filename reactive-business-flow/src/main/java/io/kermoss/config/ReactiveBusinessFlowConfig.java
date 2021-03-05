@@ -13,6 +13,7 @@ import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.web.client.RestTemplate;
 
 import feign.Client;
+import feign.okhttp.OkHttpClient;
 import io.kermoss.cmd.domain.TransporterCommand;
 import io.kermoss.cmd.infra.transporter.strategies.CommandTransporterStrategy;
 import io.kermoss.cmd.infra.transporter.strategies.FeignCommandTransporterStrategy;
@@ -62,4 +63,9 @@ public class ReactiveBusinessFlowConfig {
 			return context.getBeanFactory().getBeansOfType(CommandTransporterStrategy.class).isEmpty();
 		}
 	}
+	
+	@Bean
+    public OkHttpClient client() {
+        return new OkHttpClient();
+    }
 }

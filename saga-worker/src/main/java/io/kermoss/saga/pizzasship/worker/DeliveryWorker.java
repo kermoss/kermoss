@@ -46,7 +46,7 @@ public class DeliveryWorker extends LocalTransactionWorker<BoxDeliverProcessingE
     @SwitchBusinessLocalTransactional
     public LocalTransactionStepDefinition onNext(BoxDeliverFinishedEvent onNextEvent) {
 
-    	PayBillCommand cmd = new PayBillCommand("pay-delivery-service", "",new Bill(1, "WAFA1234")
+    	PayBillCommand cmd = new PayBillCommand("pay-delivery-service", "",new Bill(1000, "WAFA1234")
                 , "pizza-shop");
         return LocalTransactionStepDefinition.builder()
                 .in(onNextEvent)

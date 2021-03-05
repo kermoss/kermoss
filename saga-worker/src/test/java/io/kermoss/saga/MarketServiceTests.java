@@ -1,11 +1,13 @@
 package io.kermoss.saga;
 
-import static org.junit.Assert.assertEquals;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import javax.transaction.Transactional;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 
@@ -42,7 +44,7 @@ public class MarketServiceTests extends KermossIT {
     ChefPayDeliveryServiceWorker chefPayDeliveryServiceWorker;
     GlobalTransaction sellerService = null ;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         GlobalTransaction orderPizzaService = globalTransactionRepository
                 .findByNameAndParent("OrderPizzaService" , null).get();

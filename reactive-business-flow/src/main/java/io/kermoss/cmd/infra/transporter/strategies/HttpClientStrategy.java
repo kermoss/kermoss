@@ -22,7 +22,20 @@ public class HttpClientStrategy {
 
 	public CommandTransporterStrategy get() {
 		CommandTransporterStrategy strategy;
+		
 		Layer defaultLayer = kermossProperties.getTransport().getDefaultLayer();
+		if(Layer.KAFKA.equals(defaultLayer)) {
+			if(kermossProperties.getTransport().getBrokerMode()==null || kermossProperties.getTransport().getBrokerMode().getPreparedRequestUse()==null ) {
+				throw new IllegalArgumentException("configure PreparedRequestUse property in path transport.broker-mode");
+			}
+			
+			if(kermossProperties.getTransport().getBrokerMode().getPreparedRequestUse().equals(Layer.KAFKA) ) {
+				throw new IllegalArgumentException("PreparedRequestUse doesnot yet support kafka layer please think to use feign or http");
+			}
+			
+			defaultLayer=kermossProperties.getTransport().getBrokerMode().getPreparedRequestUse();
+		}
+		
 		if (Layer.HTTP.equals(defaultLayer)) {
 			strategy = new RestCommandTransporterStrategy(restTemplate, kermossProperties);
 		} else {

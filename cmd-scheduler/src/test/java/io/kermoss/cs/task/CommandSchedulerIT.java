@@ -1,11 +1,17 @@
 package io.kermoss.cs.task;
 
-import com.github.tomakehurst.wiremock.junit.WireMockClassRule;
-import com.netflix.loadbalancer.Server;
-import com.netflix.loadbalancer.ServerList;
+import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
+import static com.github.tomakehurst.wiremock.client.WireMock.moreThanOrExactly;
+import static com.github.tomakehurst.wiremock.client.WireMock.post;
+import static com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor;
+import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
+import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
+import static com.github.tomakehurst.wiremock.client.WireMock.urlMatching;
+import static com.github.tomakehurst.wiremock.client.WireMock.verify;
+import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig;
 
-import io.kermoss.cs.domain.Command;
-import io.kermoss.cs.service.CommandService;
+import java.io.IOException;
+import java.util.UUID;
 
 import org.junit.Before;
 import org.junit.ClassRule;
@@ -13,9 +19,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.cloud.netflix.ribbon.StaticServerList;
-import org.springframework.context.annotation.Bean;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -23,17 +26,14 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
-import java.io.IOException;
-import java.util.UUID;
+import com.github.tomakehurst.wiremock.junit.WireMockClassRule;
 
-import static com.github.tomakehurst.wiremock.client.WireMock.*;
-import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig;
-import static org.junit.Assert.assertEquals;
+import io.kermoss.cs.domain.Command;
+import io.kermoss.cs.service.CommandService;
 
 @SpringBootTest
 @RunWith(SpringJUnit4ClassRunner.class)
 @ActiveProfiles("test")
-@ContextConfiguration(classes = CommandSchedulerIT.LocalRibbonClientConfiguration.class)
 public class CommandSchedulerIT {
     @Autowired
     private CommandService commandService;
@@ -78,13 +78,7 @@ public class CommandSchedulerIT {
         verify(moreThanOrExactly(1), postRequestedFor(urlEqualTo(String.format("//command-executor/commands/%s/restart", cmd.getId()))));
     }
 
-    @TestConfiguration
-    public static class LocalRibbonClientConfiguration {
-        @Bean
-        public ServerList<Server> ribbonServerList() {
-            return new StaticServerList<>(new Server("localhost", wiremock.port()));
-        }
-    }
+    
 
     private Command createStartedTimedOutCommand() {
         final Command cmd = new Command(UUID.randomUUID().toString(), "STARTED");
