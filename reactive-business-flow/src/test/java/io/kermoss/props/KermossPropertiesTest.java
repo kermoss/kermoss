@@ -6,15 +6,15 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
 public class KermossPropertiesTest {
 
 	private KermossProperties kermossProperties = new KermossProperties();
 
-	@Before
+	@BeforeEach
 	public void init() {
 		kermossProperties.setServiceName("pizza-shop");
 		Map<String, Source> destinations = new HashMap<String, Source>();

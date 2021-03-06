@@ -1,13 +1,10 @@
 package io.kermoss.cmd.domain;
 
-import org.junit.Before;
-import org.junit.Test;
-
-import io.kermoss.cmd.domain.AbstractCommand;
-import io.kermoss.cmd.domain.CommandMeta;
-
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 public class AbstractCommandTest {
 
@@ -24,7 +21,7 @@ public class AbstractCommandTest {
 
     private AbstractCommand abstractCommandUnderTest;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         subject = "subject";
         source = "source";

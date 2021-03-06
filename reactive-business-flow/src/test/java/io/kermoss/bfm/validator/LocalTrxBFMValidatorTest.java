@@ -5,30 +5,22 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Spy;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-import io.kermoss.bfm.event.BaseGlobalTransactionEvent;
-import io.kermoss.bfm.event.BaseLocalTransactionEvent;
 import io.kermoss.bfm.event.BaseTransactionEvent;
 import io.kermoss.bfm.event.ErrorOccured;
-import io.kermoss.bfm.validator.dummie.gtx.OrderPizzaStateWorkerDummy;
-import io.kermoss.bfm.validator.dummie.gtx.OrderPizzaStateWorkerWNBDummy;
-import io.kermoss.bfm.validator.dummie.gtx.OrderPizzaStateWorkerWNCDummy;
-import io.kermoss.bfm.validator.dummie.gtx.OrderPizzaStateWorkerWNInDummy;
-import io.kermoss.bfm.validator.dummie.gtx.OrderPizzaStateWorkerWNMetaDummy;
 import io.kermoss.bfm.validator.dummie.ltx.ChefCookingServiceWorkerDummy;
 import io.kermoss.bfm.validator.dummie.ltx.ChefCookingServiceWorkerWNBDummy;
 import io.kermoss.bfm.validator.dummie.ltx.ChefCookingServiceWorkerWNInDummy;
 import io.kermoss.bfm.validator.dummie.ltx.ChefCookingServiceWorkerWNMetaDummy;
 import io.kermoss.bfm.validator.dummie.ltx.ChefCookingServiceWorkerWNRDummy;
 import io.kermoss.bfm.validator.dummie.ltx.ChefCookingServiceWorkerWNSDummy;
-import io.kermoss.bfm.worker.GlobalTransactionWorker;
 import io.kermoss.bfm.worker.LocalTransactionWorker;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class LocalTrxBFMValidatorTest {
 
 	@Spy

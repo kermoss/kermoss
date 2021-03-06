@@ -1,7 +1,15 @@
 package io.kermoss.trx.app.gtx;
 
-import org.junit.Before;
-import org.junit.Test;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+import static org.mockito.MockitoAnnotations.initMocks;
+
+import java.util.Optional;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 
@@ -12,15 +20,7 @@ import io.kermoss.cmd.domain.InboundCommand;
 import io.kermoss.cmd.domain.repository.CommandRepository;
 import io.kermoss.infra.BubbleMessage;
 import io.kermoss.trx.app.TransactionUtilities;
-import io.kermoss.trx.app.gtx.GlobalTransactionMapper;
-import io.kermoss.trx.app.gtx.RequestGlobalTransaction;
-
-import java.util.Optional;
-
-import static org.junit.Assert.assertEquals;
-import static org.mockito.MockitoAnnotations.initMocks;
-import static org.mockito.Mockito.*;
-
+//@Disabled
 public class GlobalTransactionMapperTest {
 
     @Mock
@@ -32,7 +32,7 @@ public class GlobalTransactionMapperTest {
     @InjectMocks
     private GlobalTransactionMapper globalTransactionMapperUnderTest;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         initMocks(this);
     }

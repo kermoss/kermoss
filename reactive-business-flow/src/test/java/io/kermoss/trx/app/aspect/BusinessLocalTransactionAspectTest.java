@@ -1,17 +1,20 @@
 package io.kermoss.trx.app.aspect;
 
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.mockito.MockitoAnnotations.initMocks;
+
 import org.aspectj.lang.ProceedingJoinPoint;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 
 import io.kermoss.bfm.pipeline.LocalTransactionStepDefinition;
-import io.kermoss.trx.app.aspect.BusinessLocalTransactionAspect;
 import io.kermoss.trx.app.exception.PoincutDefinitionException;
 import io.kermoss.trx.app.ltx.BusinessLocalTransactionManager;
-
-import static org.mockito.MockitoAnnotations.initMocks;
-import static org.mockito.Mockito.*;
 
 public class BusinessLocalTransactionAspectTest {
 
@@ -20,34 +23,37 @@ public class BusinessLocalTransactionAspectTest {
 
     private BusinessLocalTransactionAspect businessLocalTransactionAspectUnderTest;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         initMocks(this);
         businessLocalTransactionAspectUnderTest = new BusinessLocalTransactionAspect(mockBusinessLocalTransactionManager);
     }
 
-    @Test(expected = PoincutDefinitionException.class)
+    @Test
     public void testLocalTransactionPointcut() {
         // Setup
 
         // Run the test
-        businessLocalTransactionAspectUnderTest.localTransactionPointcut();
+    	assertThrows(PoincutDefinitionException.class, 
+    			()->businessLocalTransactionAspectUnderTest.localTransactionPointcut());
 
         // Verify the results
     }
 
-    @Test(expected = PoincutDefinitionException.class)
+    @Test
     public void testMoveLocalTransactionPointcut() {
         // Setup
 
         // Run the test
-        businessLocalTransactionAspectUnderTest.moveLocalTransactionPointcut();
+    	assertThrows(PoincutDefinitionException.class, 
+    			()->businessLocalTransactionAspectUnderTest.moveLocalTransactionPointcut());
 
         // Verify the results
     }
-    @Test(expected = PoincutDefinitionException.class)
+    @Test
     public void testRollBackLocalTransactionPointcut() {
-    	businessLocalTransactionAspectUnderTest.rollBackLocalTransactionPointcut();
+    	assertThrows(PoincutDefinitionException.class, 
+    			()->businessLocalTransactionAspectUnderTest.rollBackLocalTransactionPointcut());
     }
 
     @Test

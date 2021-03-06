@@ -1,22 +1,22 @@
 package io.kermoss.infra;
 
-import org.junit.Before;
-import org.junit.Test;
-
-import io.kermoss.infra.BubbleCache;
-import io.kermoss.infra.BubbleMessage;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.mockito.Mockito.mock;
 
 import java.util.Optional;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.mockito.Mockito.mock;
+import org.aspectj.lang.annotation.Before;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
+
 
 public class BubbleCacheTest {
 
     private BubbleCache bubbleCacheUnderTest;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         bubbleCacheUnderTest = new BubbleCache();
     }

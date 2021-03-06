@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import javax.transaction.Transactional;
 
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.web.server.LocalServerPort;
@@ -93,6 +94,7 @@ public class CommandTransportIntegrationTest extends KermossIT{
 
 
     @Test
+    
     public void shouldReceiveCommand() throws InterruptedException {
         final String host = String.format("http://localhost:%s/command-executor/commands", serverPort);
         final RestTemplate restTemplate = new RestTemplate();
@@ -103,7 +105,7 @@ public class CommandTransportIntegrationTest extends KermossIT{
 
         final Long commandsCount = commandRepository.count();
 
-        assertEquals(new Long(7L), commandsCount);
+        assertEquals(Long.valueOf(7L), commandsCount);
     }
 
     private TransporterCommand transform(OutboundCommand outcmd){

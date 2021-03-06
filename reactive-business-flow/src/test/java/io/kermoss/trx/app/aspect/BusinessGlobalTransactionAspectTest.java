@@ -1,18 +1,21 @@
 package io.kermoss.trx.app.aspect;
 
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.mockito.MockitoAnnotations.initMocks;
+
 import org.aspectj.lang.ProceedingJoinPoint;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.springframework.context.ApplicationEventPublisher;
 
 import io.kermoss.bfm.pipeline.GlobalTransactionStepDefinition;
-import io.kermoss.trx.app.aspect.BusinessGlobalTransactionAspect;
 import io.kermoss.trx.app.exception.PoincutDefinitionException;
 import io.kermoss.trx.app.gtx.BusinessGlobalTransactionManager;
-
-import static org.mockito.MockitoAnnotations.initMocks;
-import static org.mockito.Mockito.*;
 
 
 public class BusinessGlobalTransactionAspectTest {
@@ -24,31 +27,13 @@ public class BusinessGlobalTransactionAspectTest {
 
     private BusinessGlobalTransactionAspect businessGlobalTransactionAspectUnderTest;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         initMocks(this);
         businessGlobalTransactionAspectUnderTest = new BusinessGlobalTransactionAspect(mockBusinessTransactionManager, mockApplicationEventPublisher);
     }
 
-    @Test(expected = PoincutDefinitionException.class)
-    public void testGlobalTransactionPointcut() {
-        // Setup
-
-        // Run the test
-        businessGlobalTransactionAspectUnderTest.globalTransactionPointcut();
-
-        // Verify the results
-    }
-
-    @Test(expected = PoincutDefinitionException.class)
-    public void testCommitLocalTransactionPointcut() {
-        // Setup
-
-        // Run the test
-        businessGlobalTransactionAspectUnderTest.commitLocalTransactionPointcut();
-
-        // Verify the results
-    }
+    
 
     @Test
     public void testBeginLocalTransaction() throws Throwable {

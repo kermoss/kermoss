@@ -193,7 +193,7 @@ public class CommandOrchestratorImpl implements CommandOrchestrator {
 
     private AbstractCommand setCommandSource(AbstractCommand command){
         final String source = environment.getProperty(
-                "kermoss.serviceName",
+                "kermoss.service-name",
                 environment.getProperty("spring.application.name")
         );
         command.setSource(source);

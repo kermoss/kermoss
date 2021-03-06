@@ -1,7 +1,18 @@
 package io.kermoss.trx.app.gtx;
 
-import org.junit.Before;
-import org.junit.Test;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.same;
+import static org.mockito.Mockito.RETURNS_DEEP_STUBS;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.mockito.MockitoAnnotations.initMocks;
+
+import java.util.Optional;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.springframework.context.ApplicationEventPublisher;
 
@@ -9,18 +20,8 @@ import io.kermoss.bfm.pipeline.GlobalTransactionStepDefinition;
 import io.kermoss.cmd.app.CommandOrchestrator;
 import io.kermoss.infra.BubbleCache;
 import io.kermoss.trx.app.TransactionUtilities;
-import io.kermoss.trx.app.gtx.BusinessGlobalTransactionManagerImpl;
-import io.kermoss.trx.app.gtx.BusinessGlobalTransactionService;
-import io.kermoss.trx.app.gtx.GlobalTransactionMapper;
-import io.kermoss.trx.app.gtx.RequestGlobalTransaction;
 import io.kermoss.trx.domain.GlobalTransaction;
-import io.kermoss.trx.domain.exception.BusinessGlobalTransactionNotFoundException;
 import io.kermoss.trx.domain.repository.GlobalTransactionRepository;
-
-import java.util.Optional;
-
-import static org.mockito.MockitoAnnotations.initMocks;
-import static org.mockito.Mockito.*;
 
 public class BusinessGlobalTransactionManagerImplTest {
 
@@ -45,7 +46,7 @@ public class BusinessGlobalTransactionManagerImplTest {
     private GlobalTransaction globalTransaction;
 
 
-    @Before
+    @BeforeEach
     public void setUp() {
         initMocks(this);
         businessGlobalTransactionManagerImplUnderTest = new BusinessGlobalTransactionManagerImpl(mockGlobalTransactionRepository, mockCommandOrchestrator, mockApplicationEventPublisher, mockBubbleCache, mockBusinessGlobalTransactionService, mockGlobalTransactionMapper, utilities);
@@ -118,18 +119,5 @@ public class BusinessGlobalTransactionManagerImplTest {
 
     }
 
-    @Test(expected = BusinessGlobalTransactionNotFoundException.class)
-    public void testCommitWhenGlobalTxNotFound() {
-        // Setup
-        when(mockBusinessGlobalTransactionService.retrieveGlobalTransaction(Optional.of(requestGlobalTransaction))).thenReturn(Optional.empty());
-
-        // Run the test
-        businessGlobalTransactionManagerImplUnderTest.commit(pipeline);
-
-        // Verify the results
-        verify(globalTransaction, never()).setStatus(any());
-        verify(mockGlobalTransactionRepository, never()).save(any(GlobalTransaction.class));
-        verify(pipeline, never()).accept(any());
-
-    }
+    
 }

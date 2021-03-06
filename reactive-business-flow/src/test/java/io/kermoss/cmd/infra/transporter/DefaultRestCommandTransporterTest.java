@@ -1,8 +1,9 @@
 package io.kermoss.cmd.infra.transporter;
 
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Matchers.same;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.nullable;
+import static org.mockito.ArgumentMatchers.same;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -11,8 +12,9 @@ import static org.mockito.MockitoAnnotations.initMocks;
 
 import java.util.Optional;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.context.ApplicationEventPublisher;
@@ -45,7 +47,7 @@ public class DefaultRestCommandTransporterTest {
     @InjectMocks
     private DefaultCommandTransporter defaultCommandTransporter;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         initMocks(this);
         defaultCommandTransporter= new DefaultCommandTransporter(mockPublisher, mockCommandRepository, mockEnvironment,  mockStrategy, txLogger);
@@ -170,7 +172,7 @@ public class DefaultRestCommandTransporterTest {
         final OutboundCommand command = mock(OutboundCommand.class);
 
         when(event.getMeta()).thenReturn(meta);
-        when(mockCommandRepository.findOutboundCommandOpt(anyString())).thenReturn(Optional.empty());
+        when(mockCommandRepository.findOutboundCommandOpt(nullable(String.class))).thenReturn(Optional.empty());
         // Run the test
         defaultCommandTransporter.onEvent(event);
 
@@ -185,13 +187,13 @@ public class DefaultRestCommandTransporterTest {
 
     private void CommonSetup(OutboundCommandStarted event, CommandMeta meta, OutboundCommand command) {
         when(event.getMeta()).thenReturn(meta);
-        when(mockCommandRepository.findOutboundCommandOpt(anyString())).thenReturn(Optional.of(command));
+        when(mockCommandRepository.findOutboundCommandOpt(nullable(String.class))).thenReturn(Optional.of(command));
         when(command.getStatus()).thenReturn(OutboundCommand.Status.STARTED);
-        when(mockEnvironment.getProperty(same("kermoss.service-name"), anyString())).thenReturn("source");
+        when(mockEnvironment.getProperty(same("kermoss.service-name"), nullable(String.class))).thenReturn("source");
     }
 
     private void verifyTheCommonResults(OutboundCommand command) {
-        verify(mockEnvironment).getProperty(same("kermoss.service-name"), anyString());
+        verify(mockEnvironment).getProperty(same("kermoss.service-name"), nullable(String.class));
         verify(command).setSource(same("source"));
         verify(mockCommandRepository).save(command);
     }

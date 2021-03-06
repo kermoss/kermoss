@@ -1,10 +1,34 @@
 package io.kermoss.cmd.app;
 
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.same;
+import static org.mockito.ArgumentMatchers.nullable;
+
+import static org.mockito.Mockito.doCallRealMethod;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.mockito.MockitoAnnotations.initMocks;
+
+import java.io.IOException;
+import java.util.Optional;
+import java.util.UUID;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Mock;
+import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.core.env.Environment;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import feign.codec.DecodeException;
+
 import io.kermoss.bfm.cmd.BaseTransactionCommand;
-import io.kermoss.cmd.app.CommandOrchestratorImpl;
 import io.kermoss.cmd.domain.AbstractCommand;
 import io.kermoss.cmd.domain.CommandMeta;
 import io.kermoss.cmd.domain.InboundCommand;
@@ -19,24 +43,6 @@ import io.kermoss.cmd.exception.DecoderException;
 import io.kermoss.infra.BubbleCache;
 import io.kermoss.infra.BubbleMessage;
 import io.kermoss.infra.KermossTxLogger;
-
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Mock;
-import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.core.env.Environment;
-
-import java.io.IOException;
-import java.util.Optional;
-
-import static org.junit.Assert.assertEquals;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Matchers.same;
-import static org.mockito.Mockito.*;
-import static org.mockito.MockitoAnnotations.initMocks;
 
 public class CommandOrchestratorImplTest {
 
@@ -57,7 +63,7 @@ public class CommandOrchestratorImplTest {
 
     final private String PAYLOAD = "This is a payload";
 
-    @Before
+    @BeforeEach
     public void setUp() {
         initMocks(this);
         commandOrchestratorImplUnderTest = new CommandOrchestratorImpl(mockCommandRepository, mockPublisher, mockBubbleCache, mockMapper, mockEnvironment, txLogger);
@@ -84,6 +90,7 @@ public class CommandOrchestratorImplTest {
     public void testReceiveWhenCommandNotExistInDb() {
         // Setup
         final InboundCommand command = mock(InboundCommand.class);
+        when(command.getId()).thenReturn(UUID.randomUUID().toString());
         when(mockCommandRepository.exists(anyString())).thenReturn(true);
         when(mockCommandRepository.findOne(anyString())).thenReturn(command);
         when(command.buildMeta()).thenReturn(mockCommandMeta);
@@ -99,6 +106,7 @@ public class CommandOrchestratorImplTest {
     public void testReceiveInboundCommand() {
         // Setup
         final InboundCommand command = mock(InboundCommand.class);
+        when(command.getId()).thenReturn(UUID.randomUUID().toString());
         when(mockCommandRepository.exists(anyString())).thenReturn(true);
         when(mockCommandRepository.findOne(anyString())).thenReturn(command);
         when(command.buildMeta()).thenReturn(mockCommandMeta);
@@ -113,10 +121,11 @@ public class CommandOrchestratorImplTest {
     public void testReceiveOutboundCommand() {
         // Setup
         final OutboundCommand command = mock(OutboundCommand.class);
+        when(command.getId()).thenReturn(UUID.randomUUID().toString());
         when(mockCommandRepository.exists(anyString())).thenReturn(true);
         when(mockCommandRepository.findOne(anyString())).thenReturn(command);
         when(command.buildMeta()).thenReturn(mockCommandMeta);
-        when(mockEnvironment.getProperty(same("kermoss.serviceName"), anyString())).thenReturn("source");
+        when(mockEnvironment.getProperty(same("kermoss.service-name"), nullable(String.class))).thenReturn("source");
 
         // Run the test
         commandOrchestratorImplUnderTest.receive(command);
@@ -131,14 +140,15 @@ public class CommandOrchestratorImplTest {
     public void testReceiveBaseTransactionCommand() throws JsonProcessingException {
         // Setup
         final BaseTransactionCommand command = mock(BaseTransactionCommand.class);
+        when(command.getId()).thenReturn(UUID.randomUUID().toString());
         final AbstractCommand abstractCommand = mock(AbstractCommand.class);
         ArgumentCaptor<OutboundCommand> commandArgumentCaptor = ArgumentCaptor.forClass(OutboundCommand.class);
         BubbleMessage message = mock(BubbleMessage.class);
         when(mockBubbleCache.getBubble(anyString())).thenReturn(Optional.of(message));
-        when(mockMapper.writeValueAsString(anyString())).thenReturn(PAYLOAD);
+        when(mockMapper.writeValueAsString(nullable(String.class))).thenReturn(PAYLOAD);
         when(abstractCommand.buildMeta()).thenReturn(mockCommandMeta);
         when(mockCommandRepository.save(any(AbstractCommand.class))).thenReturn(abstractCommand);
-        when(mockEnvironment.getProperty(same("kermoss.serviceName"), anyString())).thenReturn("source");
+        when(mockEnvironment.getProperty(same("kermoss.service-name"), nullable(String.class))).thenReturn("source");
 
         // Run the test
         commandOrchestratorImplUnderTest.receive(command);
@@ -147,8 +157,8 @@ public class CommandOrchestratorImplTest {
         verify(mockCommandRepository).save(commandArgumentCaptor.capture());
         OutboundCommand mappedCommand = commandArgumentCaptor.getValue();
         verify(mockPublisher).publishEvent(any(OutboundCommandStarted.class));
-        Assert.assertEquals(mappedCommand.getPayload(), PAYLOAD);
-        Assert.assertEquals(mappedCommand.getSource(), "source");
+        assertEquals(mappedCommand.getPayload(), PAYLOAD);
+        assertEquals(mappedCommand.getSource(), "source");
         verify(mockPublisher).publishEvent(any(OutboundCommandStarted.class));
 
     }
@@ -157,14 +167,15 @@ public class CommandOrchestratorImplTest {
     public void testPrepareBaseTransactionCommand() throws JsonProcessingException {
         // Setup
         final BaseTransactionCommand command = mock(BaseTransactionCommand.class);
+        when(command.getId()).thenReturn(UUID.randomUUID().toString());
         final AbstractCommand abstractCommand = mock(AbstractCommand.class);
         ArgumentCaptor<OutboundCommand> commandArgumentCaptor = ArgumentCaptor.forClass(OutboundCommand.class);
         BubbleMessage message = mock(BubbleMessage.class);
-        when(mockBubbleCache.getBubble(anyString())).thenReturn(Optional.of(message));
-        when(mockMapper.writeValueAsString(anyString())).thenReturn(PAYLOAD);
+        when(mockBubbleCache.getBubble(nullable(String.class))).thenReturn(Optional.of(message));
+        when(mockMapper.writeValueAsString(nullable(String.class))).thenReturn(PAYLOAD);
         when(abstractCommand.buildMeta()).thenReturn(mockCommandMeta);
         when(mockCommandRepository.save(any(AbstractCommand.class))).thenReturn(abstractCommand);
-        when(mockEnvironment.getProperty(same("kermoss.serviceName"), anyString())).thenReturn("source");
+        when(mockEnvironment.getProperty(same("kermoss.service-name"), nullable(String.class))).thenReturn("source");
 
         // Run the test
         commandOrchestratorImplUnderTest.prepare(command);
@@ -172,11 +183,10 @@ public class CommandOrchestratorImplTest {
         // Verify the results
         verify(mockCommandRepository).save(commandArgumentCaptor.capture());
         OutboundCommand mappedCommand = commandArgumentCaptor.getValue();
-        verify(mockPublisher).publishEvent(any(OutboundCommandStarted.class));
-        Assert.assertEquals(mappedCommand.getPayload(), PAYLOAD);
-        Assert.assertEquals(mappedCommand.getSource(), "source");
-        Assert.assertEquals(mappedCommand.getStatus(), OutboundCommand.Status.PREPARED);
         verify(mockPublisher).publishEvent(any(OutboundCommandPrepared.class));
+        assertEquals(mappedCommand.getPayload(), PAYLOAD);
+        assertEquals(mappedCommand.getSource(), "source");
+        assertEquals(mappedCommand.getStatus(), OutboundCommand.Status.PREPARED);
     }
 
     @Test
@@ -195,9 +205,7 @@ public class CommandOrchestratorImplTest {
         // Run the test
         commandOrchestratorImplUnderTest.prepare(command);
 
-        // Verify the results
-        verify(mockPublisher).publishEvent(any(InboundCommandStarted.class));
-        Assert.assertEquals(command.getStatus(), InboundCommand.Status.PREPARED);
+        assertEquals(command.getStatus(), InboundCommand.Status.PREPARED);
         verify(mockPublisher).publishEvent(any(InboundCommandPrepared.class));
     }
 
@@ -268,7 +276,7 @@ public class CommandOrchestratorImplTest {
 
         when(command.getPayload()).thenReturn(payload);
         when(mockBubbleCache.getBubble(eventId)).thenReturn(Optional.of(message));
-        when(mockCommandRepository.findOne(anyString())).thenReturn(command);
+        when(mockCommandRepository.findOne(nullable(String.class))).thenReturn(command);
         when(mockMapper.readValue(payload, TestData.class)).thenReturn(someData);
 
         // Run the test
@@ -296,7 +304,7 @@ public class CommandOrchestratorImplTest {
         assertEquals( Optional.empty(), result);
     }
 
-    @Test(expected = CommandUnmarchelingException.class)
+    @Test
     public void testRetreiveWhenCommandNotExistInDb() throws IOException {
         // Setup
         final String eventId = "1234";
@@ -306,11 +314,10 @@ public class CommandOrchestratorImplTest {
         when(mockCommandRepository.findOne(anyString())).thenReturn(null);
 
         // Run the test
-        final Optional<TestData> result = commandOrchestratorImplUnderTest.retreive(eventId, TestData.class);
-
+       assertThrows(CommandUnmarchelingException.class, ()->commandOrchestratorImplUnderTest.retreive(eventId, TestData.class));
     }
 
-    @Test(expected = CommandUnmarchelingException.class)
+    @Test
     public void testRetreiveWhenJAcksonFireException() throws IOException {
         // Setup
         final String eventId = "1234";
@@ -323,8 +330,7 @@ public class CommandOrchestratorImplTest {
         when(mockMapper.readValue("", TestData.class)).thenThrow(JsonProcessingException.class);
 
         // Run the test
-        final Optional<TestData> result = commandOrchestratorImplUnderTest.retreive(eventId, TestData.class);
-
+        assertThrows(CommandUnmarchelingException.class, ()->commandOrchestratorImplUnderTest.retreive(eventId, TestData.class));
     }
 
     @Test
@@ -344,8 +350,8 @@ public class CommandOrchestratorImplTest {
         assertEquals(payload, result.getPayload());
     }
 
-    @Test(expected = DecoderException.class)
-    public void testCommandMapperWhenEsception() throws JsonProcessingException {
+    @Test
+    public void testCommandMapperWhenException() throws JsonProcessingException {
         // Setup
         final BaseTransactionCommand baseTransactionCommand = mock(BaseTransactionCommand.class);
         final BubbleMessage bubbleMessage = mock(BubbleMessage.class);
@@ -355,8 +361,7 @@ public class CommandOrchestratorImplTest {
         when(mockMapper.writeValueAsString(baseTransactionCommand.getPayload())).thenThrow(exception);
 
         // Run the test
-        final OutboundCommand result = commandOrchestratorImplUnderTest.commandMapper(baseTransactionCommand);
-
+      assertThrows(DecoderException.class,()-> commandOrchestratorImplUnderTest.commandMapper(baseTransactionCommand));
     }
 
     class TestData{

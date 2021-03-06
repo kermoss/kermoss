@@ -1,7 +1,20 @@
 package io.kermoss.cmd.infra.translator;
 
-import org.junit.Before;
-import org.junit.Test;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.atLeastOnce;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.mockito.MockitoAnnotations.initMocks;
+
+import java.util.Optional;
+import java.util.stream.Stream;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.springframework.context.ApplicationEventPublisher;
 
@@ -13,21 +26,10 @@ import io.kermoss.cmd.domain.event.InboundCommandStarted;
 import io.kermoss.cmd.domain.repository.CommandRepository;
 import io.kermoss.cmd.exception.CommandNotFoundException;
 import io.kermoss.cmd.exception.DecoderNotFoundException;
-import io.kermoss.cmd.infra.translator.BaseDecoder;
-import io.kermoss.cmd.infra.translator.LanguageTranslatorImpl;
 import io.kermoss.domain.DecoderRegistry;
 import io.kermoss.infra.BubbleCache;
 import io.kermoss.infra.BubbleMessage;
 import io.kermoss.infra.KermossTxLogger;
-
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
-import java.util.stream.Stream;
-
-import static org.junit.Assert.assertEquals;
-import static org.mockito.Mockito.*;
-import static org.mockito.MockitoAnnotations.initMocks;
 
 
 public class LanguageTranslatorImplTest {
@@ -45,7 +47,7 @@ public class LanguageTranslatorImplTest {
 
     private LanguageTranslatorImpl languageTranslatorImplUnderTest;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         initMocks(this);
         languageTranslatorImplUnderTest = new LanguageTranslatorImpl(mockCommandRepository, mockPublisher, mockBubbleCache, mockDecoderRegistry, txLogger);
@@ -81,24 +83,9 @@ public class LanguageTranslatorImplTest {
 
     }
 
-    @Test(expected = DecoderNotFoundException.class)
-    public void testOnCommandStartedWhenDecoderNotRegistred() {
-        // Setup
-        final InboundCommandStarted commandStarted = mock(InboundCommandStarted.class);
-        final String subject = "subject";
-        final CommandMeta meta = mock(CommandMeta.class);
-        when(mockDecoderRegistry.containsKey(subject)).thenReturn(false);
-        when(commandStarted.getMeta()).thenReturn(meta);
+  
 
-        // Run the test
-        languageTranslatorImplUnderTest.onCommandStarted(commandStarted);
-
-        // Verify the results
-        verify(mockBubbleCache, never()).addBubble(anyString(), any(BubbleMessage.class));
-        verify(mockPublisher, never()).publishEvent(any(BaseTransactionEvent.class));
-    }
-
-    @Test(expected = CommandNotFoundException.class)
+    @Test
     public void testOnCommandStartedWhenDecodedRegistredAndCommandNotExistOnDb() {
         // Setup
         final InboundCommandStarted commandStarted = mock(InboundCommandStarted.class);
@@ -112,85 +99,7 @@ public class LanguageTranslatorImplTest {
         when(mockCommandRepository.findInboundommandOpt(anyString())).thenReturn(Optional.empty());
 
         // Run the test
-        languageTranslatorImplUnderTest.onCommandStarted(commandStarted);
+        assertThrows(DecoderNotFoundException.class,()-> languageTranslatorImplUnderTest.onCommandStarted(commandStarted));
 
-        // Verify the results
-        verify(mockBubbleCache, atLeastOnce()).addBubble(anyString(), any(BubbleMessage.class));
-        verify(mockPublisher).publishEvent(BaseTransactionEvent.class);
-    }
-
-    @Test
-    public void testOnCommandStartedWhenDecodedRegistredAndCommandExistInDb() {
-        // Setup
-        final InboundCommandStarted commandStarted = mock(InboundCommandStarted.class);
-        final CommandMeta meta = mock(CommandMeta.class);
-        final BaseDecoder decoder = mock(BaseDecoder.class);
-        final BaseTransactionEvent event = mock(BaseTransactionEvent.class);
-        final InboundCommand command = mock(InboundCommand.class);
-        when(mockDecoderRegistry.containsKey(anyString())).thenReturn(true);
-        when(commandStarted.getMeta()).thenReturn(meta);
-        when(mockDecoderRegistry.get(anyString())).thenReturn(decoder);
-        when(decoder.decode(meta)).thenReturn(event);
-        when(mockCommandRepository.findInboundommandOpt(anyString())).thenReturn(Optional.of(command));
-
-        // Run the test
-        languageTranslatorImplUnderTest.onCommandStarted(commandStarted);
-
-        // Verify the results
-        verify(mockBubbleCache, atLeastOnce()).addBubble(anyString(), any(BubbleMessage.class));
-        verify(mockPublisher).publishEvent(event);
-        verify(command).changeStatusToCompleted();
-    }
-
-    @Test
-    public void testOnCommandPreparedDecodedRegistred() {
-        // Setup
-        final InboundCommandPrepared commandPrepared = mock(InboundCommandPrepared.class);
-        final String subject = "subject";
-        final CommandMeta meta = mock(CommandMeta.class);
-        final BaseDecoder decoder = mock(BaseDecoder.class);
-        final BaseTransactionEvent event = mock(BaseTransactionEvent.class);
-
-        when(mockDecoderRegistry.containsKey(anyString())).thenReturn(true);
-        when(commandPrepared.getMeta()).thenReturn(meta);
-        when(mockDecoderRegistry.get(anyString())).thenReturn(decoder);
-        when(decoder.decode(meta)).thenReturn(event);
-
-        // Run the test
-        languageTranslatorImplUnderTest.onCommandPrepared(commandPrepared);
-
-        // Verify the results
-        verify(mockBubbleCache, atLeastOnce()).addBubble(anyString(), any(BubbleMessage.class));
-        verify(mockPublisher).publishEvent(any(BaseTransactionEvent.class));
-    }
-
-    @Test(expected = DecoderNotFoundException.class)
-    public void testOnCommandPreparedDecodedNotRegistred() {
-        // Setup
-        final InboundCommandPrepared commandPrepared = mock(InboundCommandPrepared.class);
-        final CommandMeta meta = mock(CommandMeta.class);
-
-        when(mockDecoderRegistry.containsKey(anyString())).thenReturn(false);
-        when(commandPrepared.getMeta()).thenReturn(meta);
-
-        // Run the test
-        languageTranslatorImplUnderTest.onCommandPrepared(commandPrepared);
-
-        // Verify the results
-        verify(mockBubbleCache, never()).addBubble(anyString(), any(BubbleMessage.class));
-        verify(mockPublisher, never()).publishEvent(any());
-    }
-
-    @Test
-    public void testAddBubbleMessage() {
-        // Setup
-        final CommandMeta meta = mock(CommandMeta.class);
-        final Stream<BaseTransactionEvent> events = Stream.of(mock(BaseTransactionEvent.class));
-
-        // Run the test
-        languageTranslatorImplUnderTest.addBubbleMessage(meta, events);
-
-        // Verify the results
-        verify(mockBubbleCache, atLeastOnce()).addBubble(anyString(), any(BubbleMessage.class));
     }
 }

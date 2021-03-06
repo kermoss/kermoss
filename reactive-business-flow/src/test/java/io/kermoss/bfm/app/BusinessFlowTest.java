@@ -7,11 +7,11 @@ import static org.mockito.Mockito.when;
 
 import java.util.Optional;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.ApplicationEventPublisher;
 
 import io.kermoss.bfm.event.BaseTransactionEvent;
@@ -19,7 +19,7 @@ import io.kermoss.infra.BubbleCache;
 import io.kermoss.trx.domain.GlobalTransaction;
 import io.kermoss.trx.domain.repository.GlobalTransactionRepository;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class BusinessFlowTest {
 	@Mock
 	ApplicationEventPublisher publisher;
