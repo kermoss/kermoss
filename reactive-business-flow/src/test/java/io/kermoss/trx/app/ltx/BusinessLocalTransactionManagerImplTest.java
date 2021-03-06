@@ -24,6 +24,8 @@ import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 import org.springframework.context.ApplicationEventPublisher;
 
 import io.kermoss.bfm.event.ErrorLocalOccured;
@@ -39,7 +41,7 @@ import io.kermoss.trx.domain.GlobalTransaction;
 import io.kermoss.trx.domain.LocalTransaction;
 import io.kermoss.trx.domain.LocalTransaction.LocalTransactionStatus;
 import io.kermoss.trx.domain.repository.GlobalTransactionRepository;
-
+@MockitoSettings(strictness = Strictness.LENIENT)
 public class BusinessLocalTransactionManagerImplTest {
 
     @Mock
@@ -57,12 +59,11 @@ public class BusinessLocalTransactionManagerImplTest {
 
     @BeforeEach
     public void setUp() {
-        initMocks(this);
+        //initMocks(this);
         businessLocalTransactionManagerImplUnderTest = spy(new BusinessLocalTransactionManagerImpl(mockGlobalTransactionRepository, mockCommandOrchestrator, mockApplicationEventPublisher, mockBubbleCache, mockTxUtilities));
     }
 
     @Test
-    @Disabled
     public void testBeginWhenGlobalTxExistAndLocalTxNew() {
         // Setup
         final LocalTransactionStepDefinition localTransactionStepDefinition = mock(LocalTransactionStepDefinition.class);
@@ -90,27 +91,26 @@ public class BusinessLocalTransactionManagerImplTest {
         assertEquals(localTransaction.getGlobalTransaction(), globalTransaction);
         verify(mockGlobalTransactionRepository).save(globalTransaction);
         verify(businessLocalTransactionManagerImplUnderTest ).updateLTX(localTransactionStepDefinition, localTransaction);
-        verify(businessLocalTransactionManagerImplUnderTest).attachToParent(meta, gtx,null,localTransaction);
+        verify(businessLocalTransactionManagerImplUnderTest).attachToParent(meta, gtx,Optional.empty(),localTransaction);
         verify(localTransactionStepDefinition, times(2)).accept(any());
     }
 
     @Test
-    @Disabled
     public void testBeginWhenGlobalTxExistAndLocalTxExist() {
         // Setup
         final LocalTransactionStepDefinition localTransactionStepDefinition = mock(LocalTransactionStepDefinition.class);
         final WorkerMeta meta = mock(WorkerMeta.class);
-        final GlobalTransaction globalTransaction = mock(GlobalTransaction.class);
+        final GlobalTransaction globalTransaction = spy(GlobalTransaction.class);
         final LocalTransaction localTransaction = mock(LocalTransaction.class);
         final String gtx = "gtx";
         final String name = "ltx-name";
-
+        globalTransaction.setId(gtx);
         when(localTransactionStepDefinition.getMeta()).thenReturn(meta);
         when(meta.getTransactionName()).thenReturn(name);
         when(globalTransaction.getId()).thenReturn(gtx);
         doReturn(Optional.of(globalTransaction)).when(businessLocalTransactionManagerImplUnderTest).getGlobalTransaction(localTransactionStepDefinition);
         when(mockGlobalTransactionRepository.findById(anyString())).thenReturn(Optional.of(mock(GlobalTransaction.class)));
-        doReturn(Optional.of(localTransaction)).when(businessLocalTransactionManagerImplUnderTest).getLocalTransaction(anyString(), anyString(),Optional.of(anyList()));
+        doReturn(Optional.of(localTransaction)).when(businessLocalTransactionManagerImplUnderTest).getLocalTransaction(anyString(), anyString(),any());
 
         // Run the test
         businessLocalTransactionManagerImplUnderTest.begin(localTransactionStepDefinition);
@@ -128,25 +128,24 @@ public class BusinessLocalTransactionManagerImplTest {
     
 
     @Test
-    @Disabled
     public void testCommitWhenGlobalTxExistAndNestedCommitted() {
         // Setup
         final LocalTransactionStepDefinition localTransactionStepDefinition = mock(LocalTransactionStepDefinition.class);
-        final GlobalTransaction globalTransaction = mock(GlobalTransaction.class);
+        final GlobalTransaction globalTransaction = spy(GlobalTransaction.class);
         final WorkerMeta meta = mock(WorkerMeta.class);
         final LocalTransaction localTransaction = mock(LocalTransaction.class);
         final LocalTransaction nestedLocalTransaction = mock(LocalTransaction.class);
         final String gtx = "gtx";
         final String name = "ltx-name";
-
+        globalTransaction.setId(gtx);
         when(localTransactionStepDefinition.getMeta()).thenReturn(meta);
         when(meta.getTransactionName()).thenReturn(name);
         when(localTransaction.getNestedLocalTransactions()).thenReturn(new HashSet<>(Arrays.asList(nestedLocalTransaction)));
         when(localTransaction.getState()).thenReturn(LocalTransaction.LocalTransactionStatus.STARTED);
         when(nestedLocalTransaction.getState()).thenReturn(LocalTransaction.LocalTransactionStatus.COMITTED);
         doReturn(Optional.of(globalTransaction)).when(businessLocalTransactionManagerImplUnderTest).getGlobalTransaction(localTransactionStepDefinition);
-        when(mockGlobalTransactionRepository.findById(anyString())).thenReturn(Optional.of(mock(GlobalTransaction.class)));
-        doReturn(Optional.of(localTransaction)).when(businessLocalTransactionManagerImplUnderTest).getLocalTransaction(anyString(), anyString(),Optional.of(anyList()));
+        //when(mockGlobalTransactionRepository.findById(anyString())).thenReturn(Optional.of(mock(GlobalTransaction.class)));
+        doReturn(Optional.of(localTransaction)).when(businessLocalTransactionManagerImplUnderTest).getLocalTransaction(anyString(), anyString(),any());
 
 
         // Run the test
@@ -158,24 +157,24 @@ public class BusinessLocalTransactionManagerImplTest {
     }
 
     @Test
-    @Disabled
     public void testCommitWhenGlobalTxExistAndNestedNotCommitted() {
         // Setup
         final LocalTransactionStepDefinition localTransactionStepDefinition = mock(LocalTransactionStepDefinition.class);
-        final GlobalTransaction globalTransaction = mock(GlobalTransaction.class);
+        final GlobalTransaction globalTransaction = spy(GlobalTransaction.class);
         final WorkerMeta meta = mock(WorkerMeta.class);
         final LocalTransaction localTransaction = mock(LocalTransaction.class);
         final LocalTransaction nestedLocalTransaction = mock(LocalTransaction.class);
         final String gtx = "gtx";
         final String name = "ltx-name";
+        globalTransaction.setId(gtx);
 
         when(localTransactionStepDefinition.getMeta()).thenReturn(meta);
         when(meta.getTransactionName()).thenReturn(name);
         when(localTransaction.getNestedLocalTransactions()).thenReturn(new HashSet<>(Arrays.asList(nestedLocalTransaction)));
         when(nestedLocalTransaction.getState()).thenReturn(LocalTransaction.LocalTransactionStatus.STARTED);
-        when(mockGlobalTransactionRepository.findById(anyString())).thenReturn(Optional.of(mock(GlobalTransaction.class)));
+        //when(mockGlobalTransactionRepository.findById(anyString())).thenReturn(Optional.of(mock(GlobalTransaction.class)));
         doReturn(Optional.of(globalTransaction)).when(businessLocalTransactionManagerImplUnderTest).getGlobalTransaction(localTransactionStepDefinition);
-        doReturn(Optional.of(localTransaction)).when(businessLocalTransactionManagerImplUnderTest).getLocalTransaction(anyString(), anyString(),Optional.of(anyList()));
+        doReturn(Optional.of(localTransaction)).when(businessLocalTransactionManagerImplUnderTest).getLocalTransaction(anyString(), anyString(),any());
 
         // Run the test
         businessLocalTransactionManagerImplUnderTest.commit(localTransactionStepDefinition);
@@ -310,7 +309,6 @@ public class BusinessLocalTransactionManagerImplTest {
     
 
     @Test
-    @Disabled
     public void testAttachToParentWhenLocalTxExist() {
         // Setup
         final WorkerMeta meta = mock(WorkerMeta.class);
@@ -321,7 +319,7 @@ public class BusinessLocalTransactionManagerImplTest {
 
         when(meta.getChildOf()).thenReturn(childOf);
         when(mockGlobalTransactionRepository.findById(anyString())).thenReturn(Optional.of(mock(GlobalTransaction.class)));
-        doReturn(Optional.of(localTransaction)).when(businessLocalTransactionManagerImplUnderTest).getLocalTransaction(anyString(), anyString(),Optional.of(anyList()));
+        doReturn(Optional.of(localTransaction)).when(businessLocalTransactionManagerImplUnderTest).getLocalTransaction(anyString(), anyString(),any());
 
 
         // Run the test

@@ -17,13 +17,15 @@ import org.aspectj.lang.annotation.Before;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 
 import io.kermoss.bfm.cmd.BaseTransactionCommand;
 import io.kermoss.bfm.event.BaseGlobalTransactionEvent;
 import io.kermoss.bfm.event.BaseTransactionEvent;
 import io.kermoss.bfm.worker.WorkerMeta;
 import io.kermoss.trx.app.visitors.globaltx.StepGlobalTxVisitor;
-
+@MockitoSettings(strictness = Strictness.STRICT_STUBS)
 public class GlobalTransactionStepDefinitionTest {
 
     @Mock
@@ -45,7 +47,6 @@ public class GlobalTransactionStepDefinitionTest {
 
     @BeforeEach
     public void setUp() {
-        initMocks(this);
         process = null;
         receivedCommand = null;
         attach = null;

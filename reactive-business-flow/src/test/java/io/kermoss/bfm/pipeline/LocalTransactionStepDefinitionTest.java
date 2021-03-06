@@ -12,10 +12,11 @@ import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
-import org.aspectj.lang.annotation.Before;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 
 import io.kermoss.bfm.cmd.BaseTransactionCommand;
 import io.kermoss.bfm.event.BaseLocalTransactionEvent;
@@ -23,6 +24,7 @@ import io.kermoss.bfm.event.BaseTransactionEvent;
 import io.kermoss.bfm.worker.WorkerMeta;
 import io.kermoss.trx.app.visitors.localtx.StepLocalTxVisitor;
 
+@MockitoSettings(strictness = Strictness.STRICT_STUBS)
 public class LocalTransactionStepDefinitionTest {
 
     @Mock
@@ -42,7 +44,6 @@ public class LocalTransactionStepDefinitionTest {
 
     @BeforeEach
     public void setUp() {
-        initMocks(this);
         process = null;
         receivedCommand = null;
         attach = null;

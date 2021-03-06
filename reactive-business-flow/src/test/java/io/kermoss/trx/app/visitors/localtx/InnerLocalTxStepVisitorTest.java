@@ -10,7 +10,6 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.mockito.MockitoAnnotations.initMocks;
 
 import java.util.Optional;
 import java.util.function.BiConsumer;
@@ -19,9 +18,10 @@ import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 import org.springframework.context.ApplicationEventPublisher;
 
 import io.kermoss.bfm.cmd.BaseTransactionCommand;
@@ -33,7 +33,7 @@ import io.kermoss.infra.BubbleMessage;
 import io.kermoss.trx.app.TransactionUtilities;
 import io.kermoss.trx.app.visitors.VisitorProvision;
 import io.kermoss.trx.domain.LocalTransaction;
-
+@MockitoSettings(strictness = Strictness.STRICT_STUBS)
 public class InnerLocalTxStepVisitorTest {
 
     @Mock
@@ -51,7 +51,7 @@ public class InnerLocalTxStepVisitorTest {
 
     @BeforeEach
     public void setUp() {
-        initMocks(this);
+       // initMocks(this);
         innerLocalTxStepVisitorUnderTest = spy(new InnerLocalTxStepVisitor(mockBubbleCache, mockApplicationEventPublisher, mockProvision, mockCommandOrchestrator, mockUtilities));
     }
 

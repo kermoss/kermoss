@@ -5,17 +5,18 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.mockito.MockitoAnnotations.initMocks;
 
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 
 import io.kermoss.bfm.pipeline.LocalTransactionStepDefinition;
 import io.kermoss.trx.app.exception.PoincutDefinitionException;
 import io.kermoss.trx.app.ltx.BusinessLocalTransactionManager;
-
+@MockitoSettings(strictness = Strictness.STRICT_STUBS)
 public class BusinessLocalTransactionAspectTest {
 
     @Mock
@@ -25,7 +26,6 @@ public class BusinessLocalTransactionAspectTest {
 
     @BeforeEach
     public void setUp() {
-        initMocks(this);
         businessLocalTransactionAspectUnderTest = new BusinessLocalTransactionAspect(mockBusinessLocalTransactionManager);
     }
 

@@ -17,6 +17,8 @@ import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.core.env.Environment;
 import org.springframework.http.HttpStatus;
@@ -30,6 +32,7 @@ import io.kermoss.cmd.domain.repository.CommandRepository;
 import io.kermoss.cmd.infra.transporter.strategies.CommandTransporterStrategy;
 import io.kermoss.infra.KermossTxLogger;
 
+@MockitoSettings(strictness = Strictness.LENIENT)
 public class DefaultRestCommandTransporterTest {
 
     @Mock
@@ -49,7 +52,6 @@ public class DefaultRestCommandTransporterTest {
 
     @BeforeEach
     public void setUp() {
-        initMocks(this);
         defaultCommandTransporter= new DefaultCommandTransporter(mockPublisher, mockCommandRepository, mockEnvironment,  mockStrategy, txLogger);
     }
 

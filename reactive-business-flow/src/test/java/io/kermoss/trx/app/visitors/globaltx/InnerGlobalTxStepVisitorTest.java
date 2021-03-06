@@ -23,6 +23,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 import org.springframework.context.ApplicationEventPublisher;
 
 import io.kermoss.bfm.cmd.BaseTransactionCommand;
@@ -35,7 +37,7 @@ import io.kermoss.infra.BubbleMessage;
 import io.kermoss.trx.app.TransactionUtilities;
 import io.kermoss.trx.app.visitors.VisitorProvision;
 import io.kermoss.trx.domain.GlobalTransaction;
-
+@MockitoSettings(strictness = Strictness.STRICT_STUBS)
 public class InnerGlobalTxStepVisitorTest {
 
     @Mock
@@ -53,7 +55,7 @@ public class InnerGlobalTxStepVisitorTest {
 
     @BeforeEach
     public void setUp() {
-        initMocks(this);
+        //initMocks(this);
         innerGlobalTxStepVisitorUnderTest = spy(new InnerGlobalTxStepVisitor(mockBubbleCache, mockApplicationEventPublisher, mockProvision, mockCommandOrchestrator, mockUtilities));
     }
 

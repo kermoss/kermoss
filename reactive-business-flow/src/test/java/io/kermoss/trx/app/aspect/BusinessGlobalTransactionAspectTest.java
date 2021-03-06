@@ -11,13 +11,15 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 import org.springframework.context.ApplicationEventPublisher;
 
 import io.kermoss.bfm.pipeline.GlobalTransactionStepDefinition;
 import io.kermoss.trx.app.exception.PoincutDefinitionException;
 import io.kermoss.trx.app.gtx.BusinessGlobalTransactionManager;
 
-
+@MockitoSettings(strictness = Strictness.STRICT_STUBS)
 public class BusinessGlobalTransactionAspectTest {
 
     @Mock
@@ -29,7 +31,6 @@ public class BusinessGlobalTransactionAspectTest {
 
     @BeforeEach
     public void setUp() {
-        initMocks(this);
         businessGlobalTransactionAspectUnderTest = new BusinessGlobalTransactionAspect(mockBusinessTransactionManager, mockApplicationEventPublisher);
     }
 

@@ -12,6 +12,8 @@ import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 
 import io.kermoss.bfm.event.BaseGlobalTransactionEvent;
 import io.kermoss.bfm.pipeline.GlobalTransactionStepDefinition;
@@ -20,7 +22,7 @@ import io.kermoss.cmd.domain.InboundCommand;
 import io.kermoss.cmd.domain.repository.CommandRepository;
 import io.kermoss.infra.BubbleMessage;
 import io.kermoss.trx.app.TransactionUtilities;
-//@Disabled
+@MockitoSettings(strictness = Strictness.STRICT_STUBS)
 public class GlobalTransactionMapperTest {
 
     @Mock
@@ -34,7 +36,7 @@ public class GlobalTransactionMapperTest {
 
     @BeforeEach
     public void setUp() {
-        initMocks(this);
+        //initMocks(this);
     }
 
     @Test

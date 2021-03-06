@@ -3,6 +3,7 @@ package io.kermoss.trx.app.gtx;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.ArgumentMatchers.same;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -26,8 +27,8 @@ import io.kermoss.trx.domain.GlobalTransaction;
 import io.kermoss.trx.domain.repository.GlobalTransactionRepository;
 
 
-@Disabled
-//@ExtendWith(MockitoExtension.class)
+//@Disabled
+@ExtendWith(MockitoExtension.class)
 public class BusinessGlobalTransactionServiceImplTest {
 
     @Mock
@@ -40,7 +41,7 @@ public class BusinessGlobalTransactionServiceImplTest {
 
     @BeforeEach
     public void setUp() {
-        initMocks(this);
+        //initMocks(this);
         businessGlobalTransactionServiceImplUnderTest = spy(new BusinessGlobalTransactionServiceImpl(mockGlobalTransactionRepository,null));
     }
 
@@ -91,7 +92,7 @@ public class BusinessGlobalTransactionServiceImplTest {
         final GlobalTransaction globalTransaction = mock(GlobalTransaction.class);
 
 
-        when(mockGlobalTransactionRepository.findByNameAndParentAndStatus(anyString(), anyString(), any())).thenReturn(Optional.of(globalTransaction));
+        when(mockGlobalTransactionRepository.findByNameAndParentAndStatus(nullable(String.class), nullable(String.class), any())).thenReturn(Optional.of(globalTransaction));
 
         // Run the test
         final GlobalTransaction result = businessGlobalTransactionServiceImplUnderTest.participateToGlobalTransaction(orgt);
@@ -108,7 +109,7 @@ public class BusinessGlobalTransactionServiceImplTest {
         final RequestGlobalTransaction orgt = mock(RequestGlobalTransaction.class);
 
 
-        when(mockGlobalTransactionRepository.findByNameAndParentAndStatus(anyString(), anyString(), any())).thenReturn(Optional.empty());
+        when(mockGlobalTransactionRepository.findByNameAndParentAndStatus(nullable(String.class),nullable(String.class), any())).thenReturn(Optional.empty());
 
         // Run the test
         final GlobalTransaction result = businessGlobalTransactionServiceImplUnderTest.participateToGlobalTransaction(Optional.of(orgt));
@@ -202,6 +203,8 @@ public class BusinessGlobalTransactionServiceImplTest {
     
 
     @Test
+  //need power mock
+    @Disabled
     public void testStartGlobalTransactionWhenSynchronizedVote() {
         // Setup
         final RequestGlobalTransaction rgt = mock(RequestGlobalTransaction.class);
@@ -224,6 +227,8 @@ public class BusinessGlobalTransactionServiceImplTest {
     }
 
     @Test
+    //need power mock
+    @Disabled
     public void testStartGlobalTransactionWhenNotSynchronizedVote() {
         // Setup
         final RequestGlobalTransaction rgt = mock(RequestGlobalTransaction.class);
@@ -252,6 +257,7 @@ public class BusinessGlobalTransactionServiceImplTest {
         when(rgt.getCommandRequestor()).thenReturn(command);
         when(rgt.getParent()).thenReturn(parent);
         when(rgt.getName()).thenReturn(name);
-        when(GlobalTransaction.create(name,null)).thenReturn(globalTransaction);
+        // since create static method then need power mock
+        when(GlobalTransaction.create(name,any())).thenReturn(globalTransaction);
     }
 }

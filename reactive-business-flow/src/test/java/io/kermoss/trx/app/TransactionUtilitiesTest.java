@@ -11,97 +11,101 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 
+import io.kermoss.bfm.event.BaseGlobalTransactionEvent;
+import io.kermoss.bfm.event.BaseLocalTransactionEvent;
 import io.kermoss.bfm.event.BaseTransactionEvent;
 import io.kermoss.bfm.pipeline.GlobalTransactionStepDefinition;
 import io.kermoss.bfm.pipeline.LocalTransactionStepDefinition;
 import io.kermoss.infra.BubbleCache;
 import io.kermoss.infra.BubbleMessage;
-@Disabled
+
+@MockitoSettings(strictness = Strictness.STRICT_STUBS)
 public class TransactionUtilitiesTest {
 
-    @Mock
-    private BubbleCache mockBubbleCache;
+	@Mock
+	private BubbleCache mockBubbleCache;
 
-    private TransactionUtilities transactionUtilitiesUnderTest;
+	private TransactionUtilities transactionUtilitiesUnderTest;
 
-    @BeforeEach
-    public void setUp() {
-        initMocks(this);
-        transactionUtilitiesUnderTest = new TransactionUtilities(mockBubbleCache);
-    }
+	@BeforeEach
+	public void setUp() {
+		transactionUtilitiesUnderTest = new TransactionUtilities(mockBubbleCache);
+	}
 
-    @Test
-    public void testGetBubleMessageGlobalPipelineWhenEventRegistred() {
-        // Setup
-        final GlobalTransactionStepDefinition pipeline = mock(GlobalTransactionStepDefinition.class);
-        final BaseTransactionEvent event = mock(BaseTransactionEvent.class);
-        final String eventId = "eventid";
-        final BubbleMessage message = mock(BubbleMessage.class);
+	@Test
+	public void testGetBubleMessageGlobalPipelineWhenEventRegistred() {
+		// Setup
+		final GlobalTransactionStepDefinition pipeline = mock(GlobalTransactionStepDefinition.class);
+		final BaseTransactionEvent event = mock(BaseGlobalTransactionEvent.class);
+		final String eventId = "eventid";
+		final BubbleMessage message = mock(BubbleMessage.class);
 
-        when(pipeline.getIn()).thenReturn(event);
-        when(event.getId()).thenReturn(eventId);
-        when(mockBubbleCache.getBubble(eventId)).thenReturn(Optional.of(message));
+		when(pipeline.getIn()).thenReturn(event);
+		when(event.getId()).thenReturn(eventId);
+		when(mockBubbleCache.getBubble(eventId)).thenReturn(Optional.of(message));
 
-        // Run the test
-        final Optional<BubbleMessage> result = transactionUtilitiesUnderTest.getBubleMessage(pipeline);
+		// Run the test
+		final Optional<BubbleMessage> result = transactionUtilitiesUnderTest.getBubleMessage(pipeline);
 
-        // Verify the results
-        assertEquals(Optional.of(message), result);
-    }
+		// Verify the results
+		assertEquals(Optional.of(message), result);
+	}
 
-    @Test
-    public void testGetBubleMessageGlobalPipelineWhenEventNotRegistred() {
-        // Setup
-        final GlobalTransactionStepDefinition pipeline = mock(GlobalTransactionStepDefinition.class);
-        final BaseTransactionEvent event = mock(BaseTransactionEvent.class);
-        final String eventId = "eventid";
+	@Test
+	public void testGetBubleMessageGlobalPipelineWhenEventNotRegistred() {
+		// Setup
+		final GlobalTransactionStepDefinition pipeline = mock(GlobalTransactionStepDefinition.class);
+		final BaseTransactionEvent event = mock(BaseGlobalTransactionEvent.class);
+		final String eventId = "eventid";
 
-        when(pipeline.getIn()).thenReturn(event);
-        when(event.getId()).thenReturn(eventId);
-        when(mockBubbleCache.getBubble(eventId)).thenReturn(Optional.empty());
+		when(pipeline.getIn()).thenReturn(event);
+		when(event.getId()).thenReturn(eventId);
+		when(mockBubbleCache.getBubble(eventId)).thenReturn(Optional.empty());
 
-        // Run the test
-        final Optional<BubbleMessage> result = transactionUtilitiesUnderTest.getBubleMessage(pipeline);
+		// Run the test
+		final Optional<BubbleMessage> result = transactionUtilitiesUnderTest.getBubleMessage(pipeline);
 
-        // Verify the results
-        assertEquals(Optional.empty(), result);
-    }
+		// Verify the results
+		assertEquals(Optional.empty(), result);
+	}
 
-    @Test
-    public void testGetBubleMessageLocalPipelineWhenEventRegistred() {
-        // Setup
-        final LocalTransactionStepDefinition pipeline = mock(LocalTransactionStepDefinition.class);
-        final BaseTransactionEvent event = mock(BaseTransactionEvent.class);
-        final String eventId = "eventid";
-        final BubbleMessage message = mock(BubbleMessage.class);
+	@Test
+	public void testGetBubleMessageLocalPipelineWhenEventRegistred() {
+		// Setup
+		final LocalTransactionStepDefinition pipeline = mock(LocalTransactionStepDefinition.class);
+		final BaseTransactionEvent event = mock(BaseLocalTransactionEvent.class);
+		final String eventId = "eventid";
+		final BubbleMessage message = mock(BubbleMessage.class);
 
-        when(pipeline.getIn()).thenReturn(event);
-        when(event.getId()).thenReturn(eventId);
-        when(mockBubbleCache.getBubble(eventId)).thenReturn(Optional.of(message));
+		when(pipeline.getIn()).thenReturn(event);
+		when(event.getId()).thenReturn(eventId);
+		when(mockBubbleCache.getBubble(eventId)).thenReturn(Optional.of(message));
 
-        // Run the test
-        final Optional<BubbleMessage> result = transactionUtilitiesUnderTest.getBubleMessage(pipeline);
+		// Run the test
+		final Optional<BubbleMessage> result = transactionUtilitiesUnderTest.getBubleMessage(pipeline);
 
-        // Verify the results
-        assertEquals(Optional.of(message), result);
-    }
+		// Verify the results
+		assertEquals(Optional.of(message), result);
+	}
 
-    @Test
-    public void testGetBubleMessageLocalPipelineWhenEventNotRegistred() {
-        // Setup
-        final LocalTransactionStepDefinition pipeline = mock(LocalTransactionStepDefinition.class);
-        final BaseTransactionEvent event = mock(BaseTransactionEvent.class);
-        final String eventId = "eventid";
+	@Test
+	public void testGetBubleMessageLocalPipelineWhenEventNotRegistred() {
+		// Setup
+		final LocalTransactionStepDefinition pipeline = mock(LocalTransactionStepDefinition.class);
+		final BaseTransactionEvent event = mock(BaseLocalTransactionEvent.class);
+		final String eventId = "eventid";
 
-        when(pipeline.getIn()).thenReturn(event);
-        when(event.getId()).thenReturn(eventId);
-        when(mockBubbleCache.getBubble(eventId)).thenReturn(Optional.empty());
+		when(pipeline.getIn()).thenReturn(event);
+		when(event.getId()).thenReturn(eventId);
+		when(mockBubbleCache.getBubble(eventId)).thenReturn(Optional.empty());
 
-        // Run the test
-        final Optional<BubbleMessage> result = transactionUtilitiesUnderTest.getBubleMessage(pipeline);
+		// Run the test
+		final Optional<BubbleMessage> result = transactionUtilitiesUnderTest.getBubleMessage(pipeline);
 
-        // Verify the results
-        assertEquals(Optional.empty(), result);
-    }
+		// Verify the results
+		assertEquals(Optional.empty(), result);
+	}
 }

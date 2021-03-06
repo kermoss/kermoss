@@ -16,6 +16,8 @@ import java.util.stream.Stream;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 import org.springframework.context.ApplicationEventPublisher;
 
 import io.kermoss.bfm.event.BaseTransactionEvent;
@@ -31,7 +33,7 @@ import io.kermoss.infra.BubbleCache;
 import io.kermoss.infra.BubbleMessage;
 import io.kermoss.infra.KermossTxLogger;
 
-
+@MockitoSettings(strictness = Strictness.LENIENT)
 public class LanguageTranslatorImplTest {
 
     @Mock
@@ -49,7 +51,6 @@ public class LanguageTranslatorImplTest {
 
     @BeforeEach
     public void setUp() {
-        initMocks(this);
         languageTranslatorImplUnderTest = new LanguageTranslatorImpl(mockCommandRepository, mockPublisher, mockBubbleCache, mockDecoderRegistry, txLogger);
     }
 

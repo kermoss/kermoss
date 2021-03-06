@@ -15,6 +15,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
@@ -24,6 +26,7 @@ import io.kermoss.cmd.domain.OutboundCommand;
 import io.kermoss.cmd.domain.TransporterCommand;
 import io.kermoss.cmd.domain.repository.CommandRepository;
 
+@MockitoSettings(strictness = Strictness.STRICT_STUBS)
 public class CommandControllerTest {
 
     @Mock
@@ -39,7 +42,6 @@ public class CommandControllerTest {
 
     @BeforeEach
     public void setUp() {
-        initMocks(this);
         commandControllerUnderTest = new CommandController(commandMapper,mockCommandOrchestrator, mockCommandRepository);
     }
 

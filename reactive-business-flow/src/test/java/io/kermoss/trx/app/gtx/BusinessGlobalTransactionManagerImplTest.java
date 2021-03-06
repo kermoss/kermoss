@@ -7,13 +7,14 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.mockito.MockitoAnnotations.initMocks;
 
 import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 import org.springframework.context.ApplicationEventPublisher;
 
 import io.kermoss.bfm.pipeline.GlobalTransactionStepDefinition;
@@ -22,7 +23,7 @@ import io.kermoss.infra.BubbleCache;
 import io.kermoss.trx.app.TransactionUtilities;
 import io.kermoss.trx.domain.GlobalTransaction;
 import io.kermoss.trx.domain.repository.GlobalTransactionRepository;
-
+@MockitoSettings(strictness = Strictness.STRICT_STUBS)
 public class BusinessGlobalTransactionManagerImplTest {
 
     @Mock
@@ -48,7 +49,6 @@ public class BusinessGlobalTransactionManagerImplTest {
 
     @BeforeEach
     public void setUp() {
-        initMocks(this);
         businessGlobalTransactionManagerImplUnderTest = new BusinessGlobalTransactionManagerImpl(mockGlobalTransactionRepository, mockCommandOrchestrator, mockApplicationEventPublisher, mockBubbleCache, mockBusinessGlobalTransactionService, mockGlobalTransactionMapper, utilities);
 
         pipeline = mock(GlobalTransactionStepDefinition.class, RETURNS_DEEP_STUBS);
@@ -56,13 +56,14 @@ public class BusinessGlobalTransactionManagerImplTest {
         globalTransaction = mock(GlobalTransaction.class);
 
         when(mockGlobalTransactionMapper.mapTo(pipeline)).thenReturn(Optional.of(requestGlobalTransaction));
-        when(mockBusinessGlobalTransactionService.participateToGlobalTransaction(any(Optional.class))).thenReturn(globalTransaction);
+        
     }
 
     @Test
     public void testBeginWhenNewGlobalTx() {
         // Setup
-        when(globalTransaction.isNew()).thenReturn(true);
+    	when(mockBusinessGlobalTransactionService.participateToGlobalTransaction(any(Optional.class))).thenReturn(globalTransaction);
+    	when(globalTransaction.isNew()).thenReturn(true);
 
         // Run the test
         businessGlobalTransactionManagerImplUnderTest.begin(pipeline);
@@ -76,7 +77,8 @@ public class BusinessGlobalTransactionManagerImplTest {
     @Test
     public void testBeginWhenGlobalTxNotNew() {
         // Setup
-        when(globalTransaction.isNew()).thenReturn(false);
+    	when(mockBusinessGlobalTransactionService.participateToGlobalTransaction(any(Optional.class))).thenReturn(globalTransaction);
+    	when(globalTransaction.isNew()).thenReturn(false);
 
         // Run the test
         businessGlobalTransactionManagerImplUnderTest.begin(pipeline);
