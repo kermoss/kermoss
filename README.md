@@ -100,3 +100,7 @@ The (realm orchestrator) is the initiator of "global business transaction: GTX",
 
 ![LocalTxWorkerDiagSeq](images/commands.saga.dio-LocalTxWorkerDiagSeq.svg)
 
+Acknowledgements
+=================
+* YourKit supports Kermoss with its full-featured Java Profiler. Take a look at YourKit's leading software products: <a href="https://www.yourkit.com/java/profiler/features/">YourKit Java Profiler</a>.
+<img src="https://www.yourkit.com/images/yklogo.png" title="YourKit">
