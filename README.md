@@ -98,6 +98,7 @@ The (realm orchestrator) is the initiator of "global business transaction: GTX",
 
 ## LocalTxWorker:
 
+
 ![LocalTxWorkerDiagSeq](images/commands.saga.dio-LocalTxWorkerDiagSeq.svg)
 
 Acknowledgements
