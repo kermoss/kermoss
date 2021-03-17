@@ -1,0 +1,11 @@
+= Kermoss Reference Guide
+M.Aboullaite; S.Raja; M.Lahlou; K.omary; R.Mekrami
+:doctype: book
+:icons: font
+:toc2:
+:sectnums:
+:sectanchors:
+
+include::aboutDoc.adoc[leveloffset=1]
+
+include::architectureDoc.adoc[leveloffset=1]
