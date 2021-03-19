@@ -9,3 +9,5 @@ M.Aboullaite; S.Raja; M.Lahlou; K.omary; R.Mekrami
 include::aboutDoc.adoc[leveloffset=1]
 
 include::architectureDoc.adoc[leveloffset=1]
+
+include::gettingStarted.adoc[leveloffset=1]

@@ -1,0 +1,112 @@
+= Getting Started
+== Prerequisites
+
+Kermoss Framework runs on Java 8 and above, and also uses the following direct dependencies:
+
+* spring-boot version 2.2.4 and above
+* spring data jpa
+* spring kafka
+* spring cloud openfeign
+
+Regarding databases, kermoss is tested with oracle, postgresql and mysql
+
+== Getting Kermoss
+
+To be able to use kermoss in your project, add the following dependency in your pom.xml
+====
+[source,xml]
+----
+<dependency>
+    <groupId>io.kermoss</groupId>
+    <artifactId>reactive-business-flow</artifactId>
+    <version>${io.kermoss.version}</version>
+</dependency>
+----
+====
+
+To connect kermoss to your database, put this configuration in your application.yml file, the database we took as an example is postgresql (oracle or mysql are also supported)  
+
+====
+[source,yml]
+----
+spring.datasource:
+  url: jdbc:postgresql://localhost:5432/pizzashop
+  username: postgres
+  password: mysecretpassword
+  driver-class-name: org.postgresql.Driver
+  hikari: <1>
+    maximum-pool-size: 10
+
+
+# Hibernate settings
+spring.jpa.show-sql: true <2>
+spring.jpa.properties.hibernate.dialect: org.hibernate.dialect.PostgreSQLDialect
+spring.jpa.properties.hibernate.hbm2ddl.auto: create <3>
+----
+<1> kermoss uses hikari pool by default, there is no restriction to choose for example tomcat or c3p0 as connection pool
+<2> For debugging sql queries .
+<3> The database schema will be dropped and created afterward, we recommend setting this value to ** validate ** for the production environment    
+====
+
+== First steps to master Kermoss
+
+To concretely master the different concepts of kermoss we will refer to the pizzashop example, for more details on the source code of the pizzashop project see this https://github.com/kermoss/kermoss/tree/master/saga-worker[ link]
+
+The pizzashop project consists of three microservices:
+
+* pizzashop: contains the logic for ordering pizza, cooking, and payment
+* pizzaship: contains the delivery logic
+* market: provides the necessary ingredients for a pizza
+
+== How to run pizza shop microservices .
+
+====
+[source]
+----
+git clone https://github.com/kermoss/kermoss.git
+cd kermoss
+mvn clean install <1>
+cd saga-worker/target
+java -jar saga-worker-${version}.jar --spring.profiles.active=dev,shop <2>
+java -jar saga-worker-${version}.jar --spring.profiles.active=dev,ship <3>
+java -jar saga-worker-${version}.jar --spring.profiles.active=dev,market <4>
+----
+<1> This will build the whole project and include saga-worker which the maven module containing the source code for the pizza shop microservices 
+<2> launch the pizzshop microservice in dev mode
+<3> launch the pizzaship microservice in dev mode
+<4> launche the microservice market in dev mode
+
+_Each microservice has its own configuration file you can find and modify it in the saga-worker / resources folder example application-market.yml is the configuration file for market microservice_  
+====
+
+== How to run pizza shop as single monolith application .
+====
+[source]
+----
+java -jar saga-worker-${version}.jar --spring.profiles.active=dev,single <1>
+----
+<1> launch the pizzshop application in dev mode
+
+_application-single.yml est le fichier de configuration yaml pour pizza shop application_   
+====
+
+== BFM & pizzashop together 🙏
+
+[NOTE]
+====
+Kermoss by default uses communication in asynchronous mode even if the pizzaship service is not available it can continue while waiting for it to be up and running, but this does not prevent kermoss from also supporting synchronous communication in blocking mode, this will be illustrated in the scenario when pizzashop microservice requests the service market in blocking mode, if there is not enough ingredient or the service does not respond, the pizzashope service stops the global transaction    
+====
+
+The pizza shop microservice is the owner and initiator of the global transaction, so by default kermoss assigns it the role of the orchestrator of the entire distributed transaction cycle, all communication in the BFM (Business Flow Model) internally in pizza shop are driven by events, on the other hand communication with other microservices (market and pizza ship) are driven by commands
+
+
+[TIP]
+====
+A BFM (Business Flow Model) is just a set of components in the form of a java class called ** workers ** (global and local transaction)
+
+.A BFM is made up of :
+
+* ** worker ** class that extends GlobalTransactionWorker allowing to start or close a global transaction by listening on events..
+* ** worker ** class that extends LocalTransactionWorker allowing to start or close or rollback (compensate) a local transaction by listening on events.
+* Each ** worker ** communicate internally by events and can send commands to remote BFMs all this happens through ** TransactionStepDefinition ** these are in a way the equivalent of RouteBuilder in the camel project.    
+====
