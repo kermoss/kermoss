@@ -1,22 +1,25 @@
 package io.kermoss.trx.domain;
 
-import org.hibernate.annotations.GenericGenerator;
+import java.util.Date;
 
 import javax.persistence.Column;
 import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.MappedSuperclass;
 import javax.validation.constraints.NotNull;
-import java.util.Date;
+
+import org.hibernate.annotations.GenericGenerator;
 
 
 @MappedSuperclass
 public class State {
-    @Id
-    @GeneratedValue(generator = "uuid")
-    @GenericGenerator(name = "uuid", strategy = "uuid")
-    @Column(columnDefinition = "CHAR(32)")
+	@Id
+	@GenericGenerator(name = "uuid2", strategy = "uuid2")
+	@GeneratedValue(strategy = GenerationType.IDENTITY, generator = "uuid2")
+	@Column(length = 36, nullable = false, updatable = false)
     protected String id;
+	
     protected Long timestamp = new Date().getTime();
     @NotNull
     protected String name;

@@ -16,9 +16,9 @@ import javax.validation.constraints.NotNull;
 @Table(name = "KERMOSS_GTX")
 public class GlobalTransaction {
 	@Id
-	@GeneratedValue(generator = "uuid")
-	@GenericGenerator(name = "uuid", strategy = "uuid")
-	@Column(columnDefinition = "CHAR(32)")
+	@GenericGenerator(name = "uuid2", strategy = "uuid2")
+	@GeneratedValue(strategy = GenerationType.IDENTITY, generator = "uuid2")
+	@Column(length = 36, nullable = false, updatable = false)
 	private String id;
 	
 	protected Long timestamp = new Date().getTime();
