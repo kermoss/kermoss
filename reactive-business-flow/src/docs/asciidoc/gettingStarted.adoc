@@ -24,10 +24,62 @@ To be able to use kermoss in your project, add the following dependency in your 
 ----
 ====
 
-To connect kermoss to your database, put this configuration in your application.yml file, the database we took as an example is postgresql (oracle or mysql are also supported)  
+=== connect kermoss to your database   
+
+Kermoss uses ** Liquibase ** (an open source database change management tool) to manage the versioning of its database schema, if you already have liquibase in your project, you just have to add only this line to your db.changelog-master.xml file
+
+[source,xml]
+----
+<include file="db/changelog/db-kermoss-master.xml" relativeToChangelogFile="false"/>
+---- 
+If your project does not include the ** liquibase ** tool, in this case add the following configuration in your pom.xml in the section menu:build[plugins]
 
 ====
-[source,yml]
+[source,xml]
+----
+<plugin>
+  <groupId>org.liquibase</groupId>
+   <artifactId>liquibase-maven-plugin</artifactId>
+   <configuration>
+	<propertyFile>src/main/resources/liquibase.properties</propertyFile> <1>
+	</configuration>
+</plugin>
+----
+<1> create the liquibase.properties file in the menu:src[main>resources] location with the following elements:
+
+[source, properties]
+----
+url=jdbc:postgresql://localhost:5432/pizzashop <1>
+username=postgres <2>
+password=mysecretpassword <3>
+driver=org.postgresql.Driver <4>
+changeLogFile=db/changelog/db.changelog-master.xml <5>
+----
+for (1)-(2)-(3)-(4) change them with those of your own database .
+
+for (5) create db.changelog-master.xml file in the menu:src[main>resources>db>changelog] folder in your project with the following content:
+
+[source, xml]
+----
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
+    <include file="db/changelog/db-kermoss-master.xml" relativeToChangelogFile="false"/>
+</databaseChangeLog>
+----
+it's almost finished, run the maven command to import the kermoss schema into your database:
+
+[source, shell]
+----
+mvn process-resources liquibase:update
+----     
+====
+
+Normally Kermoss should integrate into your project with your existing dataSource and transactionManager configuration with no worries.
+
+If you have not yet configured your dataSource , put this configuration in your application.yml file, the database we took as an example is postgresql (oracle or mysql are also supported)
+
+====
+[source,yaml]
 ----
 spring.datasource:
   url: jdbc:postgresql://localhost:5432/pizzashop
@@ -41,16 +93,16 @@ spring.datasource:
 # Hibernate settings
 spring.jpa.show-sql: true <2>
 spring.jpa.properties.hibernate.dialect: org.hibernate.dialect.PostgreSQLDialect
-spring.jpa.properties.hibernate.hbm2ddl.auto: create <3>
+spring.jpa.properties.hibernate.hbm2ddl.auto: validate <3>
 ----
 <1> kermoss uses hikari pool by default, there is no restriction to choose for example tomcat or c3p0 as connection pool
 <2> For debugging sql queries .
-<3> The database schema will be dropped and created afterward, we recommend setting this value to ** validate ** for the production environment    
+<3> We recommend setting this value to ** validate ** for the production environment    
 ====
 
 == First steps to master Kermoss
 
-To concretely master the different concepts of kermoss we will refer to the pizzashop example, for more details on the source code of the pizzashop project see this https://github.com/kermoss/kermoss/tree/master/saga-worker[ link]
+To concretely master the different concepts of kermoss we will refer to the pizzashop example, for more details on the source code of the pizzashop project see https://github.com/kermoss/kermoss/tree/master/saga-worker[here]
 
 The pizzashop project consists of three microservices:
 
@@ -58,11 +110,11 @@ The pizzashop project consists of three microservices:
 * pizzaship: contains the delivery logic
 * market: provides the necessary ingredients for a pizza
 
-== How to run pizza shop microservices .
+== How to run pizza shop microservices
 
 ====
-[source]
-----
+[source, shell]
+
 git clone https://github.com/kermoss/kermoss.git
 cd kermoss
 mvn clean install <1>
@@ -70,7 +122,7 @@ cd saga-worker/target
 java -jar saga-worker-${version}.jar --spring.profiles.active=dev,shop <2>
 java -jar saga-worker-${version}.jar --spring.profiles.active=dev,ship <3>
 java -jar saga-worker-${version}.jar --spring.profiles.active=dev,market <4>
-----
+
 <1> This will build the whole project and include saga-worker which the maven module containing the source code for the pizza shop microservices 
 <2> launch the pizzshop microservice in dev mode
 <3> launch the pizzaship microservice in dev mode
@@ -79,9 +131,11 @@ java -jar saga-worker-${version}.jar --spring.profiles.active=dev,market <4>
 _Each microservice has its own configuration file you can find and modify it in the saga-worker / resources folder example application-market.yml is the configuration file for market microservice_  
 ====
 
-== How to run pizza shop as single monolith application .
+If all goes well without error, this entry point **http://localhost:8081/pizza/test/order** allows you to run the pizza order scenario.
+
+== How to run pizza shop as single monolith application
 ====
-[source]
+[source,shell]
 ----
 java -jar saga-worker-${version}.jar --spring.profiles.active=dev,single <1>
 ----
@@ -110,3 +164,77 @@ A BFM (Business Flow Model) is just a set of components in the form of a java cl
 * ** worker ** class that extends LocalTransactionWorker allowing to start or close or rollback (compensate) a local transaction by listening on events.
 * Each ** worker ** communicate internally by events and can send commands to remote BFMs all this happens through ** TransactionStepDefinition ** these are in a way the equivalent of RouteBuilder in the camel project.    
 ====
+
+== Create your first globalTransaction worker
+
+You just have to create a class OrderPizzaStateWorker.java (see the example of pizzashop) which extends GlobalTransactionWorker and annotate it with spring @Component annotation
+
+====
+[source, java, linenums]
+----
+@Component
+public class OrderPizzaStateWorker extends GlobalTransactionWorker<OrderPizzaReceivedEvent, OrderPizzaReadyEvent> {
+    
+    public OrderPizzaStateWorker() {
+        super(new WorkerMeta("OrderPizzaService")); <1>
+    }
+
+    @Override
+    @BusinessGlobalTransactional <2>
+    public GlobalTransactionStepDefinition onStart(OrderPizzaReceivedEvent orderPizzaReceivedEvent)  { <3>
+        return GlobalTransactionStepDefinition.builder() <4>
+                .in(orderPizzaReceivedEvent)<5>
+                .meta(this.meta)<6>
+                .process(Optional.empty())<7>
+                .blow(Stream.of(new OrderPizzaReadyEvent(orderPizzaReceivedEvent.getCartId())))<8>
+                .build();
+    }
+
+    @Override
+    @CommitBusinessGlobalTransactional <9>
+    public GlobalTransactionStepDefinition onComplete(OrderPizzaReadyEvent orderPizzaReadyEvent ) { <10>
+        return GlobalTransactionStepDefinition.builder()
+                .in(orderPizzaReadyEvent)
+                .meta(this.meta)
+                .process(Optional.empty())
+                .build();
+    }
+}
+----
+<1> Worker Meta data, contains the unique name of the global Transaction, it allows to identify it, and to attach the different local transaction workers that must be subordinated by this transaction
+<2> Transaction Demarcation: start a new global transaction by listening to an event
+<3> listen on an event of type OrderPizzaReceivedEvent
+<4> Create a Global Transaction StepDefinition it is the equivalent of a route builder it allows to execute a command chain
+<5> allow the Global Transaction StepDefinition to consume the event
+<6> pass the meta data reference to the Global Transaction StepDefinition
+<7> you can put a side effect here
+<8> trigger an event stream
+<9> Transaction Demarcation: Commit and close Global Transaction by listening to an event
+<10> listen on an event of type orderPizzaReadyEvent
+====
+
+== Begin a new Global transaction
+
+To be able to start a new global transaction, start an event with:
+
+====
+[source, java ,linenums]
+----
+@Autowired <1>
+ApplicationEventPublisher applicationEventPublisher;
+
+@Transactional <2>
+    public void prepareOrder(Cart cart){
+        orders.put(cart.getId(), cart);
+        applicationEventPublisher.publishEvent(new OrderPizzaReceivedEvent(cart.getId()));<3>
+    }
+----
+<1> inject a spring ApplicationEventPublisher to publish en event
+<2> decorate your method with the classic ** @ Transactional ** annotation from spring
+<3> publish your event to start the global transaction   
+====
+
+== Link a global transaction context 
+== Send a command To a remote BFM
+=== Configure your layer transport
+== Enlist a Local Transaction Worker

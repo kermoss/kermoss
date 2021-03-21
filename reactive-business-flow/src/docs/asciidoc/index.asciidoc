@@ -5,6 +5,11 @@ M.Aboullaite; S.Raja; M.Lahlou; K.omary; R.Mekrami
 :toc2:
 :sectnums:
 :sectanchors:
+//:source-highlighter: rouge
+//:source-highlighter: coderay
+:source-highlighter: pygments
+:pygments-style: monokai
+:experimental:
 
 include::aboutDoc.adoc[leveloffset=1]
 
