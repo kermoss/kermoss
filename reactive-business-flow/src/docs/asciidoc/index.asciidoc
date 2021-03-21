@@ -1,5 +1,5 @@
 = Kermoss Reference Guide
-M.Aboullaite; S.Raja; M.Lahlou; K.omary; R.Mekrami
+S.Raja; M.Aboullaite; M.Lahlou; K.omary; R.Mekrami
 :doctype: book
 :icons: font
 :toc2:

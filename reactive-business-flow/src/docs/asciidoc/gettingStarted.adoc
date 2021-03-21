@@ -165,6 +165,39 @@ A BFM (Business Flow Model) is just a set of components in the form of a java cl
 * Each ** worker ** communicate internally by events and can send commands to remote BFMs all this happens through ** TransactionStepDefinition ** these are in a way the equivalent of RouteBuilder in the camel project.    
 ====
 
+== Kermoss : project organization
+
+it is better to have the following organization for your project, however you are free to choose a suitable structure for your project, the objective of this part is to show you the different components that you would need to develop your project with kermoss.   
+
+----
+📒 pizza-shop <1>
+  📄 pom.xml
+  📂 src/main/java
+    📂 org.pizzasho <2>
+      📂 api <3>
+      📂 cmd <4>
+      📂 decoder <5>
+      📂 domain <6>
+      📂 event <7>
+      📂 exception <8>
+      📂 service <9>
+      📂 worker <10>
+        📄 OrderPizzaStateWorker.java <11>
+  📂 src/main/resources
+    📄 application.yml <12>  
+----
+<1> your project root
+<2> your root package: the domain name
+<3> you can create your rest api here
+<4> package containing the commands to send to remote BFMs
+<5> package contains decoder services; when a command lands in a remote microservice, the decoder service creates an event based on the commands subject (a subject is only a key that allows the mapping with the distination of the command), for this purpose a given worker (global or local transaction) receives this command by listening on this event.   
+<6> your domain business logic (model + repositories + services)
+<7> package containing the events for internal communication between the different workers (Global and Local transaction)
+<8> package containing exceptions
+<9> package containing the services of the application layer
+<10> package containing the BFM as a component, we recommend that worker adhere to the following convention: <serviceName> Worker.java
+<11> contains the configuration of kermoss as well as your application
+
 == Create your first globalTransaction worker
 
 You just have to create a class OrderPizzaStateWorker.java (see the example of pizzashop) which extends GlobalTransactionWorker and annotate it with spring @Component annotation
@@ -234,7 +267,47 @@ ApplicationEventPublisher applicationEventPublisher;
 <3> publish your event to start the global transaction   
 ====
 
-== Link a global transaction context 
+== Link a global transaction context
+
+Supposing that in some situation you want to launch an event from your business logic to call a worker (ex: play, commit, or rollback a localTransaction), in this case you need a way to attach the context of a global transaction, by persisting its id in your business model at this level you can communicate with your BFM, outside the context of the global transaction
+
+Kermoss provides this feature by offering the attach method in the pipeline ** GlobalTransactionStepDefinition ** or ** LocalTransactionStepDefinition ** in this case you can bind a global transaction context either from GlobalTransaction worker, or LocalTransaction Worker.
+
+[source,java]
+----
+       return GlobalTransactionStepDefinition.builder()
+                ...
+                .attach(gtx ->orderSevice.saveGlobalTransactionId(gtx)) <1>
+                .build();
+    }
+----
+ 
+== Call your BFM workers from outside  
+
+You can call your BFM at all levels from your business logic by injecting the BusinessFlow component of the kermoss framework into your services then call the ** access ** method
+      
+[source,java]
+----
+@Service
+public class BakingService {
+
+    @Autowired
+    BusinessFlow businessFlow; <1>
+    	
+    private static final Logger log = LoggerFactory.getLogger(BakingService.class);
+    @Transactional <2>
+    public void bake(String gtx, String cartid){
+        businessFlow.access(gtx, new BakingPizzaReadyEvent(cartid));	<3>
+    }
+}
+----
+<1> inject a kermoss ** BusinessFlow ** service
+<2> wrap your business logic with the classic spring annoation ** @ Transactional **, to ensure that your business logic is transactional including BFM 
+<3> call the access method by injecting it with a global transaction id already persisted in your business model, then the second parameter used as event to commit the local transaction ** BakerPizzaServiceWorker ** in the pizzashop microservice
+
 == Send a command To a remote BFM
+
+//Envoyer une command à un BFM distant est une mission facile pour kermoss fra   
+
 === Configure your layer transport
 == Enlist a Local Transaction Worker
