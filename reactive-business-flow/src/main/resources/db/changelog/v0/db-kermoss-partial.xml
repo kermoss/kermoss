@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
+    <changeSet author="kermoss" id="kermoss-v0-1">
+        <createTable tableName="kermoss_cmd">
+            <column name="pool" type="VARCHAR(31)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="id" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="timestamp" type="BIGINT"/>
+            <column name="fltx" type="VARCHAR(255)"/>
+            <column name="gtx" type="VARCHAR(255)"/>
+            <column name="ltx" type="VARCHAR(255)"/>
+            <column name="pgtx" type="VARCHAR(255)"/>
+            <column name="additional_headers" type="VARCHAR(255)"/>
+            <column name="destination" type="VARCHAR(255)"/>
+            <column name="failed_timestamp" type="BIGINT"/>
+            <column name="payload" type="TEXT"/>
+            <column name="source" type="VARCHAR(255)"/>
+            <column name="started_timestamp" type="BIGINT"/>
+            <column name="subject" type="VARCHAR(255)"/>
+            <column name="trace_id" type="VARCHAR(255)"/>
+            <column name="completed_timestamp" type="BIGINT"/>
+            <column name="ref_id" type="VARCHAR(255)"/>
+            <column name="status" type="VARCHAR(255)"/>
+            <column name="delivered_timestamp" type="BIGINT"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="kermoss" id="kermoss-v0-2">
+        <createTable tableName="kermoss_gtx">
+            <column name="id" type="VARCHAR(36)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="name" type="VARCHAR(255)"/>
+            <column name="parent" type="VARCHAR(255)"/>
+            <column name="status" type="VARCHAR(255)"/>
+            <column name="timestamp" type="BIGINT"/>
+            <column name="trace_id" type="VARCHAR(255)"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="kermoss" id="kermoss-v0-3">
+        <createTable tableName="kermoss_gtx_var">
+            <column name="id" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="k" type="VARCHAR(255)"/>
+            <column name="v" type="VARCHAR(255)"/>
+            <column name="gtx_id" type="VARCHAR(36)"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="kermoss" id="kermoss-v0-4">
+        <createTable tableName="kermoss_ltx">
+            <column name="id" type="VARCHAR(36)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="name" type="VARCHAR(255)"/>
+            <column name="timestamp" type="BIGINT"/>
+            <column name="fltx" type="VARCHAR(255)"/>
+            <column name="b_key" type="BIGINT"/>
+            <column name="state" type="VARCHAR(255)"/>
+            <column name="gtx_id" type="VARCHAR(36)"/>
+            <column name="ltx_id" type="VARCHAR(36)"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="kermoss" id="kermoss-v0-5">
+        <addPrimaryKey columnNames="id" constraintName="kermoss_cmd_pkey" tableName="kermoss_cmd"/>
+    </changeSet>
+    <changeSet author="kermoss" id="kermoss-v0-6">
+        <addPrimaryKey columnNames="id" constraintName="kermoss_gtx_pkey" tableName="kermoss_gtx"/>
+    </changeSet>
+    <changeSet author="kermoss" id="kermoss-v0-7">
+        <addPrimaryKey columnNames="id" constraintName="kermoss_gtx_var_pkey" tableName="kermoss_gtx_var"/>
+    </changeSet>
+    <changeSet author="kermoss" id="kermoss-v0-8">
+        <addPrimaryKey columnNames="id" constraintName="kermoss_ltx_pkey" tableName="kermoss_ltx"/>
+    </changeSet>
+    <changeSet author="kermoss" id="kermoss-v0-9">
+        <createIndex indexName="idxde6b83gfymvmmjftcuvikmju8" tableName="kermoss_cmd">
+            <column name="started_timestamp"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="kermoss" id="kermoss-v0-10">
+        <createIndex indexName="idxnqwbyo6xu8s93s5ktheju5y84" tableName="kermoss_cmd">
+            <column name="status"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="kermoss" id="kermoss-v0-11">
+        <addForeignKeyConstraint baseColumnNames="ltx_id" baseTableName="kermoss_ltx" constraintName="fkfhnu5kfp826rity2nap7l7yfd" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="id" referencedTableName="kermoss_ltx"/>
+    </changeSet>
+    <changeSet author="kermoss" id="kermoss-v0-12">
+        <addForeignKeyConstraint baseColumnNames="gtx_id" baseTableName="kermoss_gtx_var" constraintName="fkljsaqnnom3s1hed6rn1dwsf6d" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="id" referencedTableName="kermoss_gtx"/>
+    </changeSet>
+    <changeSet author="kermoss" id="kermoss-v0-13">
+        <addForeignKeyConstraint baseColumnNames="gtx_id" baseTableName="kermoss_ltx" constraintName="fkshd0msxfc6djc483ycmb695qd" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="id" referencedTableName="kermoss_gtx"/>
+    </changeSet>
+</databaseChangeLog>

@@ -1,5 +1,5 @@
 spring.datasource:
-  url: jdbc:postgresql://localhost:5432/pizzashop
+  url: jdbc:postgresql://localhost:5432/pizzashop_dev
   username: postgres
   password: mysecretpassword
   driver-class-name: org.postgresql.Driver
@@ -10,9 +10,8 @@ spring.datasource:
 
 # Hibernate settings
 spring.jpa.show-sql: true
-spring.jpa.hibernate.ddl-auto: create
 spring.jpa.properties.hibernate.dialect: org.hibernate.dialect.PostgreSQLDialect
-spring.jpa.properties.hibernate.hbm2ddl.auto: create
+spring.jpa.properties.hibernate.hbm2ddl.auto: validate
 
      
 logging.level.org.springframework.transaction: ERROR
