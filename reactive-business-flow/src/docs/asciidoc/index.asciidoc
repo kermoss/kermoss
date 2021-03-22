@@ -6,7 +6,7 @@ S.Raja; M.Aboullaite; M.Lahlou; K.omary; R.Mekrami
 :sectnums:
 :sectanchors:
 :source-highlighter: rouge
-//:rouge-style: monokai
+:rouge-style: monokai
 
 //:source-highlighter: coderay
 //:source-highlighter: pygments
