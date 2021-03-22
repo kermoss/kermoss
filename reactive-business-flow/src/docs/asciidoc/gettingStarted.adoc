@@ -404,7 +404,7 @@ public class DeliverPizzaDecoder implements BaseDecoder {
 
 === How to configure the decoder service
 
-Pour que votre service decoder soit capable de créer un évenement à base l'arrivé d'une command il faut l'enregister et le mapper avec le subject de la dite command dans un composant that extends de la class DecoderRegistry .
+So that your ** decoder service ** is able to produce an event when a command arrives, it is necessary to register it and map it with the subject of the command in a dedicated component for the configuration, see the code java below .
 
 ====
 [source, java]
