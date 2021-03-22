@@ -162,7 +162,7 @@ A BFM (Business Flow Model) is just a set of components in the form of a java cl
 
 * ** worker ** class that extends GlobalTransactionWorker allowing to start or close a global transaction by listening on events..
 * ** worker ** class that extends LocalTransactionWorker allowing to start or close or rollback (compensate) a local transaction by listening on events.
-* Each ** worker ** communicate internally by events and can send commands to remote BFMs all this happens through ** TransactionStepDefinition ** these are in a way the equivalent of RouteBuilder in the camel project.    
+* Each ** worker ** communicate internally by events and can send commands to remote BFMs all this happens through a chain of operators ** TransactionStepDefinition ** these are in a way the equivalent of RouteBuilder in the camel project.    
 ====
 
 == Kermoss : project organization
@@ -190,7 +190,7 @@ it is better to have the following organization for your project, however you ar
 <2> your root package: the domain name
 <3> you can create your rest api here
 <4> package containing the commands to send to remote BFMs
-<5> package contains decoder services; when a command lands in a remote microservice, the decoder service creates an event based on the commands subject (a subject is only a key that allows the mapping with the distination of the command), for this purpose a given worker (global or local transaction) receives this command by listening on this event.   
+<5> package contains decoder services; when a command lands in a remote microservice, the decoder service creates an event based on the commands subject (a subject is only a key that allows the mapping with an event), for this purpose a given worker (global or local transaction) receives this command by listening on this event.   
 <6> your domain business logic (model + repositories + services)
 <7> package containing the events for internal communication between the different workers (Global and Local transaction)
 <8> package containing exceptions
@@ -267,7 +267,7 @@ ApplicationEventPublisher applicationEventPublisher;
 <3> publish your event to start the global transaction   
 ====
 
-== Link a global transaction context
+== Bind a global transaction context
 
 Supposing that in some situation you want to launch an event from your business logic to call a worker (ex: play, commit, or rollback a localTransaction), in this case you need a way to attach the context of a global transaction, by persisting its id in your business model at this level you can communicate with your BFM, outside the context of the global transaction
 
@@ -307,7 +307,145 @@ public class BakingService {
 
 == Send a command To a remote BFM
 
-//Envoyer une command à un BFM distant est une mission facile pour kermoss fra   
+Sending a command to a remote BFM is quite simple with kermoss, just create a class that extends BaseTransactionCommand and choose a convinient string **_subject_** which would later be used by the remote BFM's decoder service to create an event (kermoss will publish this event to the various subscribers in the BFM in order to receive this command). The  **_destination_** key parameter that you will then map it with an target address (HTTP, or a Kafka topic) depending on the layer transportation of your preference. then you use the ** send ** operator of the ** TransactionStepDefinition ** pipeline allowing to send a command stream either from a global or a local transaction
+ 
+====
+[source,java]
+----
 
-=== Configure your layer transport
+@Override
+    @SwitchBusinessLocalTransactional
+    public LocalTransactionStepDefinition onNext(BoxDeliverFinishedEvent onNextEvent) {
+       String invoiceRef="5b6a668c-152a-44b4-8fbd-8819bc63aebb"; 
+    	PayBillCommand cmd = new PayBillCommand("pay-delivery-service", "",new Bill(1, invoiceRef)
+                , "pizza-shop"); <1>
+        return LocalTransactionStepDefinition.builder()
+                .in(onNextEvent)
+                .blow(Stream.of(new BoxDelivredEvent()))<2>
+                .meta(this.meta)
+                .send(Stream.of(cmd)) <3>
+                .build();
+    }
+
+----
+<1> pizzaship microservice configure the PayBillCommand command with the **destination** key **pizza-shop** to send it to the pizzashop microservice & ** subject ** key **"pay-delivery-service"** to trigger an event by the decoder service of the remote BFM 
+<2> triggers the BoxDelivredEvent
+<3> the operator **send(Stream.of(cmd))** is used to send the PayBillCommand command
+    
+====
+
+=== Map a command's subject with a target address
+
+Kermoss routes the commands to the remote BFMs based on their destination key, the destination key must be mapped with an address (HTTP or service name in consul or eurika registry services, kafka topic) in your configuration file.
+====
+[source, yaml]
+----
+kermoss: 
+  service-name: pizza-shop
+  transport: 
+    default-layer: http <1>
+  sources: 
+    shippement-service: <2>
+      feign: shippement-service <3>
+      http: "http://localhost:8083/command-executor/command" <4>
+      kafka: io.kermoss.topics.pizzashop.shippementservice <5>
+----
+<1> choose your suitable transport layer; the possible values ​​are: kafka for the kafka broker, or if you prefer the HTTP transport layer, use feign or http
+<2> this is the subject key of the commad to map to a target address
+<3> if the ** feign ** option is chosen as a value for the ** transport.default-layer ** property, the ** "shippement-service" ** value of the ** feign ** key should match the service name of the microservice (pizza ship) in your service catalog (eurika, consul)
+<4> use the "http" key mapped to an http address of the "pizza ship" microservice if only if the ** http ** option is chosen as a value for the ** transport.default-layer ** property, the following path "/ command-executor / command" must be included in your http url
+<5> the value of the kafka key matches the name of the kafka topic if only if the ** kafka ** option is configured as a value for the ** transport.default-layer ** property.
+====
+
+[TIP]
+====
+.transport.default-layer property:
+* We recommend that you adopt the feign option if your choice of transport layer will be HTTP and you later want to deploy your microservice with kermoss in a production environment.
+* Use http option in your test or development environment, or if you do not have a registry service
+====
+
+== Receive a command from a remote BFM
+if you have opted for kafka to be the default transport layer for your project, in this case it will be necessary to add this following configuration part in your yaml or properties file: 
+====
+[source, yaml]
+----
+kermoss: 
+  service-name: pizza-shop
+  transport: 
+    default-layer: kafka
+  sinks: <1>
+    pizza-shop: 
+      kafka: io.kermoss.topics.pizzashop <2>
+
+----
+<1> sinks: wraps all the possible topics to consume, as a source of commands for your BFM
+<2> tells kermoss if you have chosen the kafka value for the transport.default-layer property to consume the commands coming from the topic ** io.kermoss.topics.pizzashop **
+ 
+====
+
+As already explained previously, when a command lands on your microservice, it is necessary to trigger an event indicating to the BFM that there is a new command waiting in the pool to be consumed by workers that subscribe to this event.
+to carry out this operation you should create a decoder service allowing to produce this event.
+
+====
+[source, java]
+----
+public class DeliverPizzaDecoder implements BaseDecoder {
+
+    @Override
+    public BaseTransactionEvent decode(CommandMeta meta) { <1>
+        BoxArrivedEvent deliverPizzaStartedEvent = new BoxArrivedEvent();<2>
+        return deliverPizzaStartedEvent;
+    }
+}
+----
+<1> contains the mata data on the command
+<2> produce an event and then drop it off by kermoss on an event bus, so workers who subscribe to this type of event can consume the command     
+====
+
+=== How to configure the decoder service
+
+Pour que votre service decoder soit capable de créer un évenement à base l'arrivé d'une command il faut l'enregister et le mapper avec le subject de la dite command dans un composant that extends de la class DecoderRegistry .
+
+====
+[source, java]
+----
+@Configuration
+public class DecoderConfiguration extends DecoderRegistry { <1>
+
+    @PostConstruct
+    public void setup() {
+        DeliverPizzaDecoder decoder1 = new DeliverPizzaDecoder();
+        this.put("deliver-pizza", decoder1); <2>
+        
+    }
+}
+----
+<1> here you can put all the mapping of your decoder services in your microservice
+<2> "deliver-pizza" subject mapping with the DeliverPizzaDecoder
+====
+
+=== Commands consumption .
+ 
+In the end, the command becomes visible and ready to be consumed by all the workers of your BFM who are subscribed to the BoxArrivedEvent event
+
+====
+[source, java]
+----
+public class DeliverBoxWorker extends GlobalTransactionWorker<BoxArrivedEvent, BoxDelivredEvent> { 
+ @Override
+    @BusinessGlobalTransactional
+    public GlobalTransactionStepDefinition onStart(BoxArrivedEvent boxArrivedEvent){ <1>
+        return GlobalTransactionStepDefinition.builder()
+                .in(boxArrivedEvent)
+                .meta(this.meta)
+                .receive(ToDilever.class, x -> System.out.println(x.toString())) <2>
+                .build();
+    }
+ ...   
+}
+---- 
+<1> subscribe to the ** boxArrivedEvent ** event produced by the decoder Service ** DeliverPizzaDecoder **
+<2> consumption of the command : ToDilever  
+====
+
 == Enlist a Local Transaction Worker
