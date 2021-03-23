@@ -29,14 +29,14 @@ Kermoss was designed to serve a network of federated BFM nodes [Terminologies](#
 
 The (realm orchestrator) is the initiator of "global business transaction: GTX", an orchestrator of the federated network becomes ambassador after receiving a "Tag" containing GTX and can start by delegation a local transaction ( foreign local transaction: FLTX) in another BFM context, however the (realm orchestrator) is the only one responsible for rollback a (LTX: local transaction / NTLX (nested local transaction) and FLTX: foreign local transaction) via "rollback policies".
 
-=== Kermoss ToolBox:
+=== Kermoss ToolBox
 
 * Saga of transactions distributed via (realm-ambassador) pattern
 * Idempotence out of box at all levels, out of the box
 * Very advanced auditabilty: Debugging and monitoring of the entire value chain managed by Kermoss
 * Reliability is the core principle of Kermoss and the dimension that gave it more chance to exist
 
-=== Terminologies:
+=== Terminologies
 
 * BFM (Business Flow Model): Business Unit Worker; each BUW manages the life cycle of a local transactions
 * BTM (Business Transaction Manager): Component managing the life cycle of the global business transaction as well as the local taransactions

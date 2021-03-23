@@ -24,7 +24,7 @@ To be able to use kermoss in your project, add the following dependency in your 
 ----
 ====
 
-=== connect kermoss to your database   
+== Connect kermoss to your database   
 
 Kermoss uses ** Liquibase ** (an open source database change management tool) to manage the versioning of its database schema, if you already have liquibase in your project, you just have to add only this line to your db.changelog-master.xml file
 
@@ -100,6 +100,31 @@ spring.jpa.properties.hibernate.hbm2ddl.auto: validate <3>
 <3> We recommend setting this value to ** validate ** for the production environment    
 ====
 
+== Basic configuration concepts
+
+this part indicates the first concepts to start kermoss within your project, it illustrates the basic and fundamental elements to configure your development or test environment.
+====
+[source,yaml]
+----
+kermoss: <1>
+  service-name: pizza-shop <2>
+  transport:
+    default-layer: http <3>
+    sources:
+      market-service: <4>
+          http: http://localhost:8081/command-executor/commands <5>
+      shippement-service:
+           http: http://localhost:8081/command-executor/commands
+      pizza-shop: 
+           http: http://localhost:8081/command-executor/commands
+----
+<1> this is the root of the kermoss properties, at this level you can explore all the properties to configure using the auto-completion of your IDE
+<2> the name of your microservice or application is used to improve the audit and the level of command tracking, if you omit this option the name of the application of your project will be taken into account.
+<3> possible values ​​are: kafka, feign, and http
+<4> the destination key configured at the command level
+<5> the target address to which kermoss will send the command based on the destination key    
+====
+ 
 == First steps to master Kermoss
 
 To concretely master the different concepts of kermoss we will refer to the pizzashop example, for more details on the source code of the pizzashop project see https://github.com/kermoss/kermoss/tree/master/saga-worker[here]
@@ -195,12 +220,12 @@ it is better to have the following organization for your project, however you ar
 <7> package containing the events for internal communication between the different workers (Global and Local transaction)
 <8> package containing exceptions
 <9> package containing the services of the application layer
-<10> package containing the BFM as a component, we recommend that worker adhere to the following convention: <serviceName> Worker.java
+<10> package containing the BFM as a component, we recommend that worker adhere to the following convention: <serviceName>Worker.java
 <11> contains the configuration of kermoss as well as your application
 
 == Create your first globalTransaction worker
 
-You just have to create a class OrderPizzaStateWorker.java (see the example of pizzashop) which extends GlobalTransactionWorker and annotate it with spring @Component annotation
+You just have to create a java class like OrderPizzaStateWorker.java (see the example of pizzashop) which extends GlobalTransactionWorker and annotate it with spring @Component annotation
 
 ====
 [source, java, linenums]
@@ -307,7 +332,9 @@ public class BakingService {
 
 == Send a command To a remote BFM
 
-Sending a command to a remote BFM is quite simple with kermoss, just create a class that extends BaseTransactionCommand and choose a convinient string **_subject_** which would later be used by the remote BFM's decoder service to create an event (kermoss will publish this event to the various subscribers in the BFM in order to receive this command). The  **_destination_** key parameter that you will then map it with an target address (HTTP, or a Kafka topic) depending on the layer transportation of your preference. then you use the ** send ** operator of the ** TransactionStepDefinition ** pipeline allowing to send a command stream either from a global or a local transaction
+Sending a command to a remote BFM is quite simple with kermoss, just create a class that extends BaseTransactionCommand and choose a convinient string **_subject_** which would later be used by the remote BFM's decoder service to create an event (kermoss will publish this event to the various subscribers in the BFM in order to receive this command). The second important argument is  **_destination_** key parameter that you will then map it with an target address (HTTP, or a Kafka topic) depending on the transport layer of your preference.
+ 
+Finally you can call the ** send ** operator of the ** TransactionStepDefinition ** pipeline allowing to send a command stream either from a global or a local transaction.
  
 ====
 [source,java]
@@ -424,7 +451,7 @@ public class DecoderConfiguration extends DecoderRegistry { <1>
 <2> "deliver-pizza" subject mapping with the DeliverPizzaDecoder
 ====
 
-=== Commands consumption .
+=== Commands consumption
  
 In the end, the command becomes visible and ready to be consumed by all the workers of your BFM who are subscribed to the BoxArrivedEvent event
 
@@ -449,3 +476,129 @@ public class DeliverBoxWorker extends GlobalTransactionWorker<BoxArrivedEvent, B
 ====
 
 == Enlist a Local Transaction Worker
+
+the creation and the enrollment of a local transaction is very similar to a global transaction, indeed to create a local transaction it is enough just to extend the class ** LocalTransactionWorker ** and to annotate it with @component so that it is supported by kermoss, we can take as an example the ChefCookingServiceWorker.java class in the pizzashop microservice.
+====
+[source, java]
+----
+package io.kermoss.saga.pizzashop.worker;
+
+@Component
+public class ChefCookingServiceWorker
+		extends LocalTransactionWorker<OrderPizzaPendingEvent, OrderPizzaCookedEvent, ErrorLocalOccured> {
+
+	@Autowired
+	PizzaService pizzaService;
+
+	public ChefCookingServiceWorker() {
+		super(new WorkerMeta("MakingPizza", "OrderPizzaService"));<1>
+	}
+
+	@Override
+	@BusinessLocalTransactional <2>
+	public LocalTransactionStepDefinition onStart(OrderPizzaPendingEvent orderPizzaPendingEvent) { <3>
+		return LocalTransactionStepDefinition.builder().in(orderPizzaPendingEvent)<4>
+				.blow(Stream.of(new BakingPizzaPendingEvent(orderPizzaPendingEvent.getCartID()))).meta(this.meta) <5>
+				.build();
+	}
+
+	@Override
+	@SwitchBusinessLocalTransactional <6>
+	public LocalTransactionStepDefinition onNext(OrderPizzaCookedEvent orderPizzaCookedEvent) {
+
+		OrderPizzaReadyForShipmentCommand cmd = null;
+		if (pizzaService != null) {
+
+			ToDilever b = new ToDilever("Some address", pizzaService.getOrders().get(orderPizzaCookedEvent.getCartId())
+					.getPizzas().stream().map(Pizza::getName).collect(Collectors.toList()));
+			cmd = new OrderPizzaReadyForShipmentCommand("deliver-pizza", "", b, "shippement-service");
+		}
+		return LocalTransactionStepDefinition.builder().in(orderPizzaCookedEvent)
+				.blow(Stream.of(new OrderPizzaReadyEvent(orderPizzaCookedEvent.getCartId()))).<7>
+				send(Stream.of(cmd)) <8>
+				.meta(this.meta).build();
+	}
+
+	@Override
+	@RollBackBusinessLocalTransactional <9>
+	public LocalTransactionStepDefinition onError(ErrorLocalOccured errorLocalOccured) { <10>
+		return LocalTransactionStepDefinition.builder().in(errorLocalOccured).meta(this.meta).build();
+	}
+}
+
+----
+<1> worker Meta data, contains the unique name **MakingPizza** of the local Transaction, it allows to identify it, also it allows to register it in the global transaction "OrderPizzaService"
+<2> Transaction demarcation: start a new local transaction by listening to an event
+<3> listen on an event of type OrderPizzaPendingEvent
+<4> allow the Local Transaction StepDefinition to consume the event
+<5> pass the meta data reference to the local Transaction StepDefinition
+<6> transaction demarcation: Commit and close Local Transaction by listening to an event
+<7> trigger an event stream
+<8> send a command stream
+<9> transaction demarcation: rollBack a Business LocalTransaction by listening to an event of type ErrorLocalOccured
+<10> listen on an event of type ErrorLocalOccured
+====
+
+[IMPORTANT]
+====
+* a local transaction can monitor one or more local transactions
+* a local transaction can only be registered to a single local transaction or global transaction through the metaWorker
+* a local transaction cannot be committed, only if all of its children are committed 
+====
+
+== Compensating transaction (rollback)
+
+the rollback phase of a business transaction begins when: 
+
+* if one of the BFM workers fire an exception.
+* one or more workers define a rollback policy by catching this exception:
+   ** a rollback policy consists of mapping this exception to an event.
+   ** a rollback policy can define a global or local compensation scope
+   ** if the scope of compensation is global, the Orchestrator (realm manager) of the global transaction sends a message to all members (ambassadors), to stop worker transactions and only accept compensation commands or execute methods annotated with @RollBackBusinessLocalTransactional
+   ** if the scope of compensation is local, a global transaction may have another chance to recover.
+
+====
+[source, java]
+----
+@Override
+	@BusinessLocalTransactional
+	public LocalTransactionStepDefinition onStart(DeliveryBillArrivedEvent deliveryBillArrivedEvent) {
+		return LocalTransactionStepDefinition.builder().in(deliveryBillArrivedEvent)
+				.blow(Stream.of(new DeliveryBillPayed())).receive(Bill.class, x -> {  <1>
+					System.out.println(x.toString());
+					if (x.getPrice() > 2) {
+                     throw new ExpensiveException("pizza is too much expensive");  <2>
+					}
+				})
+				 .compensateWhen(Propagation.GLOBAL,Stream.of(new PizzaRejectedEvent ()),DelayException.class, ExpensiveException.class) <3>
+				.receive(Bill.class, (x, y) -> log.info("linking object {} with gtx {}", y, x)).meta(this.meta).build();
+
+	}
+	
+	@Override
+	@RollBackBusinessLocalTransactional
+	
+	public LocalTransactionStepDefinition onError(PizzaRejectedEvent pizzaRejectedEvent) { <4>
+		return LocalTransactionStepDefinition.builder().in(pizzaRejectedEvent).meta(this.meta).build();
+	}
+	
+----
+<1> receives a command of type Bill.java
+<2> under certain conditions you can raise an exception
+<3> defines rollback policy which consists of mapping one or more exceptions to an event stream and indicating the scope of propagation.
+<4> start a rollback pipeline by listening on the PizzaRejectedEvent
+====
+
+[WARNING]
+====
+* Not all exceptions raised within your application are captured by kermoss to start a rollback (compensating a business transaction).
+* it must be triggered from a pipeline ** LocalTransactionStepDefinition ** or ** GlobalTransactionStepDefinition ** 
+====
+
+[TIP]
+====
+.Best practice
+* always remember to create a service that you can inject into your BFM worker (Global or local), then call the method of this service containing the logic that raises an exception from the pipeline operators ** LocalTransactionStepDefinition ** or ** GlobalTransactionStepDefinition **
+* in general the two operators recieve and process are sufficient to wrap the logic of an exception
+    
+====

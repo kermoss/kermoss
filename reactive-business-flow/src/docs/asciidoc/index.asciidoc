@@ -1,8 +1,9 @@
-= Kermoss Reference Guide
+=  image:./images/kermoss-picto.png[width=50, role="related thumb"] Kermoss Reference Guide
 S.Raja; M.Aboullaite; M.Lahlou; K.omary; R.Mekrami
 :doctype: book
 :icons: font
 :toc2:
+:toclevels: 4
 :sectnums:
 :sectanchors:
 :source-highlighter: rouge
