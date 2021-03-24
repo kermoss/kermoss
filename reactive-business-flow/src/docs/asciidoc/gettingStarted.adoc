@@ -550,11 +550,11 @@ public class ChefCookingServiceWorker
 
 the rollback phase of a business transaction begins when: 
 
-* if one of the BFM workers fire an exception.
-* one or more workers define a rollback policy by catching this exception:
+* if one of the BFM workers fire an exception using its local or global pipeline builder (LocalTransactionStepDefinition or GlobalTransactionStepDefinition).
+* the worker defines ** in the same pipeline builder ** a rollback policy by catching this exception:
    ** a rollback policy consists of mapping this exception to an event.
    ** a rollback policy can define a global or local compensation scope
-   ** if the scope of compensation is global, the Orchestrator (realm manager) of the global transaction sends a message to all members (ambassadors), to stop worker transactions and only accept compensation commands or execute methods annotated with @RollBackBusinessLocalTransactional
+   ** if the scope of compensation is global, the Orchestrator (realm manager) of the global transaction sends a message to all members (ambassadors), to suspend all transactions (global or local) and prepare them for a possible rollback . in this case The BFM (business flow model) instances accept only a commands dedicated for compensation or execute methods annotated with @RollBackBusinessLocalTransactional
    ** if the scope of compensation is local, a global transaction may have another chance to recover.
 
 ====
@@ -592,7 +592,7 @@ the rollback phase of a business transaction begins when:
 [WARNING]
 ====
 * Not all exceptions raised within your application are captured by kermoss to start a rollback (compensating a business transaction).
-* it must be triggered from a pipeline ** LocalTransactionStepDefinition ** or ** GlobalTransactionStepDefinition ** 
+* an exception should be triggered and captured by the same pipeline builder ** LocalTransactionStepDefinition ** or ** GlobalTransactionStepDefinition ** 
 ====
 
 [TIP]
@@ -602,3 +602,4 @@ the rollback phase of a business transaction begins when:
 * in general the two operators recieve and process are sufficient to wrap the logic of an exception
     
 ====
+== Synchronization

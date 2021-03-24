@@ -51,3 +51,5 @@ image::./images/kermoss-archi.svg[]
 === Kermoss respect hexagonal architecture
 
 image::./images/commands.saga.dio-Archi-Hexa.svg[]
+
+// image::./images/commands.saga.dio-LocalTxWorkerDiagSeq.svg[]

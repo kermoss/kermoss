@@ -18,3 +18,5 @@ include::aboutDoc.adoc[leveloffset=1]
 include::architectureDoc.adoc[leveloffset=1]
 
 include::gettingStarted.adoc[leveloffset=1]
+
+include::config.adoc[leveloffset=1]
