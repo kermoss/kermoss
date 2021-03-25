@@ -602,4 +602,37 @@ the rollback phase of a business transaction begins when:
 * in general the two operators recieve and process are sufficient to wrap the logic of an exception
     
 ====
+
 == Synchronization
+
+As explained previously, kermoss always promotes communication between its components in asynchronous mode and driven by messages, however in certain situations, you will have to condition the progress of your transaction by the availability of one or more business services, for example in the case of pizzashop microservice could only start its global transaction if the market service is up & running.
+
+To synchronize the progress of your global transaction with the availability of one or more business services, the pipeline builder GlobalTransactionStepDefinition offers the operator ** prepare ** to perform this feature.
+
+====
+[source , java]
+----
+@Override
+    @BusinessGlobalTransactional
+    public GlobalTransactionStepDefinition onStart(OrderPizzaReceivedEvent orderPizzaReceivedEvent) {
+        Need need = new Need(Arrays.asList("Tomatos", "mozzarella cheese", "meat"));
+        CallMarketCommand cmd = new CallMarketCommand("call-market", "",
+                need, "market-service"); <1>
+       return GlobalTransactionStepDefinition.builder()
+                .in(orderPizzaReceivedEvent)
+                .meta(this.meta)
+                .process(Optional.empty())
+                .prepare(Stream.of(cmd)) <2>
+                .blow(Stream.of(new OrderPizzaPendingEvent(orderPizzaReceivedEvent.getCartId())))
+                .attach(gtx -> System.out.println("Attaching external process with gtx : " + gtx + " to OrderPizzaStateWorker"))
+                .build();
+    }
+----
+<1> create a command that you want to send to the remote BFM of the microservice Market as part of the synchronization protocol
+<2> call the operator ** prepare ** to complete the synchronization
+====
+
+[TIP]
+====
+When you perform a synchronization with another microservice, it also allows to create a new BFM instance (ambassador) in this micorservice 
+====
