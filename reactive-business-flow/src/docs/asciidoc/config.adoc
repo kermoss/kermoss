@@ -1,4 +1,17 @@
 = Kermoss configuration
+
+Almost like all frameworks, kermoss offers a variety of properties to facilitate the use of its configuration, you are free to configure kermoss either with a yaml file or properties, in addition all the list of properties exposed by kermoss are discoverable by using the auto-completion of your IDE (ex: Spring Tools 4 plugin)
+ 
+the kermoss configuration targets notably:
+
+* importing schema to your database (see link:#_connect_kermoss_to_your_database[here])
+* The configuration of dataSource and TransactionManager (see link:#_datasource_plumbing[here]) normally kermoss should be auto-configured with your existing dataSource and TransactionManager of your application
+* the layers of tansports; for the moment kermoss supports:
+ ** HTTP via feign or restemplate from spring
+ ** kafka if you have already put a (message broker) kafka
+* decoder services (see link:#_how_to_configure_the_decoder_service[here]).
+* scheduling engine
+
 == Advanced configuration
 = Scheduler engine
 = Auditability

@@ -74,6 +74,8 @@ mvn process-resources liquibase:update
 ----     
 ====
 
+=== DataSource plumbing
+
 Normally Kermoss should integrate into your project with your existing dataSource and transactionManager configuration with no worries.
 
 If you have not yet configured your dataSource , put this configuration in your application.yml file, the database we took as an example is postgresql (oracle or mysql are also supported)
