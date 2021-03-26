@@ -1,5 +1,6 @@
 =  image:./images/kermoss-picto.png[width=50, role="related thumb"] Kermoss Reference Guide
 S.Raja; M.Aboullaite; M.Lahlou; K.omary; R.Mekrami
+:docinfo:
 :doctype: book
 :icons: font
 :toc2:
