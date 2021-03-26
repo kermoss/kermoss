@@ -1,17 +1,218 @@
 = Kermoss configuration
 
-Almost like all frameworks, kermoss offers a variety of properties to facilitate the use of its configuration, you are free to configure kermoss either with a yaml file or properties, in addition all the list of properties exposed by kermoss are discoverable by using the auto-completion of your IDE (ex: Spring Tools 4 plugin)
+Almost like all frameworks, kermoss offers a variety of properties to facilitate the use of its configuration, you are free to configure kermoss either with a yaml or properties file, in addition all the list of properties exposed by kermoss are discoverable by using the auto-completion of your IDE (ex: Spring Tools 4 plugin)
  
 the kermoss configuration targets notably:
 
 * importing schema to your database (see link:#_connect_kermoss_to_your_database[here])
-* The configuration of dataSource and TransactionManager (see link:#_datasource_plumbing[here]) normally kermoss should be auto-configured with your existing dataSource and TransactionManager of your application
-* the layers of tansports; for the moment kermoss supports:
- ** HTTP via feign or restemplate from spring
- ** kafka if you have already put a (message broker) kafka
+* dataSource and TransactionManager (see link:#_datasource_plumbing[here]). Normally kermoss should be auto-configured seamlessly with your existing dataSource and TransactionManager of your application.
+* transport layers. For the moment kermoss supports:
+ ** HTTP via feign or restTemplate from spring
+ ** kafka if you have already put a (message broker kafka)
 * decoder services (see link:#_how_to_configure_the_decoder_service[here]).
 * scheduling engine
 
+== Kafka as the default transport Layer
+====
+[source, yaml]
+----
+kermoss:
+  service-name: pizza-shop
+  transport:
+    broker-mode:
+      prepared-request-use: http <1> 
+    default-layer: kafka <2>
+    kafka:
+      consumer:
+         group-name: ${kermoss.service-name} <3>
+      bootstrap-address: 192.168.3.127:9092,192.168.3.128:9092,192.168.3.129:9092 <4> 
+  sources: <5>
+      market-service: <6>
+          kafka: io.kermoss.topics.pizzashop.marketservice <7>
+      shippement-service:
+           kafka: io.kermoss.topics.pizzashop.shippementservice           
+  sinks: <8>
+     pizza-shop: 
+           kafka: io.kermoss.topics.pizzashop <9>
+----
+<1> prepared-request-use: tell kermoss to use http or feign when synchronizing BFM instances,for more details about synchronization see link:#_synchronization[here]. This property is restricted when choosing kafka broker as transport layer
+<2> default-layer: configured to route commands to recipients using kafka.
+<3> group-name: the group name of kafka consumer, a consumer group is a set of consumers which cooperate to consume data from some topics, The Consumer Group name is global across a Kafka cluster.
+<4> bootstrap-address is a comma-separated list of host and port pairs that are the addresses of the Kafka brokers
+<5> sources: wraps a list of command destinations, and maps them to a target address
+<6> the destination name of a command: used by kermoss to route a command to an address.
+<7> the target address of the command, to should be preceded by the key ** kafka **;
+<8> sinks: wraps all the possible topics to consume, as a source of commands for your BFM
+<9> the name of the topic to which the consumers' group subscribes, this topic name should be preceded by the key ** kafka **  
+====
+
+[NOTE]
+====
+.kermoss.sinks:
+this property is ignored when configuring default-layer property with feign or http      
+====
+
+== HTTP as the default transport Layer
+=== Feign support
+====
+[source, yaml]
+----
+kermoss:
+  service-name: pizza-shop
+  transport:
+    default-layer: feign <1>
+  sources: <2>
+      market-service: <3>
+          feign: market-service <4>
+      shippement-service:
+          feign: shippement-service
+      pizza-shop: 
+           feign: pizza-shop
+----
+<1> default-layer: configured to route commands to recipients using **feign**
+<2> sources: wraps a list of command destinations, and maps them to a target address
+<3> the destination name of a command: used by kermoss to route a command to an address.
+<4> the target address of the command, it should be preceded by the key ** feign ** and the value should match the service name of the microservice (pizza market) in your service registry (eurika, consul)
+====
+
+=== Http restTemplate support
+====
+[source, yaml]
+----
+kermoss:
+  service-name: pizza-shop
+  transport:
+    default-layer: http <1>
+  sources: <2>
+      market-service:<3>
+          http: http://localhost:8081/command-executor/commands <4>
+      shippement-service:
+           http: http://localhost:8081/command-executor/commands
+      pizza-shop: 
+           http: http://localhost:8081/command-executor/commands
+----
+<1> default-layer: configured to route commands to recipients using **http with restTemplate support**
+<2> sources: wraps a list of command destinations, and maps them to a target address
+<3> the destination name of a command: used by kermoss to route a command to an address.
+<4> the target address of the command, it should be preceded by the key ** http ** ,all values ​​must respect the following convention: **<service address>/command-executor/commands**
+====
+
 == Advanced configuration
-= Scheduler engine
-= Auditability
+
+If you are not satisfied, or you find some limitation regarding the default implementation of the kemoss framework configuration according to your needs, you are free to reimplement some configuration that comes with kermoss including those of kafka (producer and consumer ) and the command routing strategy.   
+  
+=== Define your KafkaProducer
+To reimplement the configuration of your kafkaTemplate you should at least write your configuration as follows: 
+
+====
+[source, java]
+----
+@Configuration
+public class CustomKafkaProducerConfig {
+
+	@Autowired
+	private KermossProperties kermossProperties; <1>
+
+    
+	
+    public ProducerFactory<String, TransporterCommand> producerFactory() {
+    	String bootstrapAddress = kermossProperties.getTransport().getKafka().getBootstrapAddress(); <2>
+		
+		if(bootstrapAddress==null) {
+			throw new IllegalArgumentException("Kermoss: Kafka bootstrapAddress property is not specified");
+		}
+    	Map<String, Object> configProps = new HashMap<>();
+        configProps.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapAddress);
+        ... <3>
+        return new DefaultKafkaProducerFactory<>(configProps);
+    }
+    
+    @Bean
+    @ConditionalOnProperty(name="kermoss.transport.default-layer",havingValue="kafka")
+    public KafkaTemplate<String, TransporterCommand> kafkaTemplate() {
+        ... <4>
+        return new KafkaTemplate<>(producerFactory());
+    }
+    
+}
+----
+<1> inject KermossProperties to access the different properties exposed by kermoss.
+<2> access the kafka configuration
+<3> Here you configure the properties of your producerFactory
+<4> here you configure your KafkaTemplate according to your needs.
+====
+
+=== Define your KafkaListener container factory
+
+To reimplement the configuration of your ** ConcurrentKafkaListenerContainerFactory ** you should at least write your configuration as follows: 
+
+====
+[source, java]
+----
+@EnableKafka <1>
+@Configuration
+public class CustomKafkaConsumerConfig {
+
+	@Autowired
+	private KermossProperties kermossProperties; <2>
+
+	public ConsumerFactory<String,TransporterCommand> consumerFactory() {
+		String bootstrapAddress = kermossProperties.getTransport().getKafka().getBootstrapAddress();<3>
+		String groupName = kermossProperties.getTransport().getKafka().getConsumer().getGroupName();
+		 ...<4>
+        return new DefaultKafkaConsumerFactory<>(props, new StringDeserializer(), new JsonDeserializer<>(TransporterCommand.class));
+    }
+    
+	@Bean
+    @ConditionalOnProperty(name="kermoss.transport.default-layer",havingValue="kafka")
+    public ConcurrentKafkaListenerContainerFactory<String, TransporterCommand> kafkaManualAckListenerContainerFactory() {
+        ConcurrentKafkaListenerContainerFactory<String, TransporterCommand> factory = new ConcurrentKafkaListenerContainerFactory<>();
+        ContainerProperties props = factory.getContainerProperties();
+        ... <5>
+        factory.setConsumerFactory(consumerFactory());
+        return factory;
+    }
+
+}
+----
+<1> enable Kafka listener annotated endpoints.
+<2> inject KermossProperties to access the different properties exposed by kermoss
+<3> access the kafka configuration
+<4> here you configure the properties of your ** ConsumerFactory **
+<5> here you configure your **ConcurrentKafkaListenerContainerFactory** according to your needs.  
+====
+
+=== Suitable strategy for transporting your commands
+
+To reimplement the transport strategies of your commands, you should reimplement the configuration method ** "CommandTransporterStrategy strategy" ** with @Bean annotation, then redefine your strategy by implementing the following interface CommandTransporterStrategy 
+
+====
+[source, java]
+----
+@Bean
+public CommandTransporterStrategy strategy(KafkaTemplate<String, TransporterCommand> kafkaTemplate,
+			RestTemplate restTemplate, final KermossProperties kermossProperties, final Client client) {
+		
+		Layer layer = kermossProperties.getTransport().getDefaultLayer();
+		
+		CommandTransporterStrategy commandTransporterStrategy;
+
+		switch (layer) {
+		case HTTP:
+			commandTransporterStrategy = new RestCommandTransporterStrategy(restTemplate, kermossProperties);
+			break;
+		case FEIGN:
+			commandTransporterStrategy = new FeignCommandTransporterStrategy(client,kermossProperties,
+					FeignCommandTransporterStrategy::defaultClientFactory);
+			break;
+		default:
+			commandTransporterStrategy = new KafkaCommandTransporterStrategy(kafkaTemplate, kermossProperties);
+			break;
+		}
+
+		return commandTransporterStrategy;
+	}
+----   
+====   
+//= Scheduler engine
+//= Auditability
