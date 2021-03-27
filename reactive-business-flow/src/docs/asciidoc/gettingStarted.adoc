@@ -562,6 +562,9 @@ the rollback phase of a business transaction begins when:
 ====
 [source, java]
 ----
+@Autowired
+	PizzaService pizzaService;
+	
 @Override
 	@BusinessLocalTransactional
 	public LocalTransactionStepDefinition onStart(DeliveryBillArrivedEvent deliveryBillArrivedEvent) {
@@ -579,7 +582,6 @@ the rollback phase of a business transaction begins when:
 	
 	@Override
 	@RollBackBusinessLocalTransactional
-	
 	public LocalTransactionStepDefinition onError(PizzaRejectedEvent pizzaRejectedEvent) { <4>
 		return LocalTransactionStepDefinition.builder().in(pizzaRejectedEvent).meta(this.meta).build();
 	}
