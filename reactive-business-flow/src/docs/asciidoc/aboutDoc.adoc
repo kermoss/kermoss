@@ -1,1 +1,1 @@
-//image::./images/KERMOSS-LOGO.png[]
+Welcome to the Kermoss Framework documentation site! Here you can find the reference materials, guides, and examples to write and deploy your BFM (business Flow model) using kermoss , You do not need to read this guide in a linear fashion. Each piece stands on its own, though they often refer to other pieces.

@@ -25,7 +25,7 @@ Kermoss was designed to adhere the Let it crash pattern, all communications betw
 
 == Solution: Kermoss Framework
 
-Kermoss was designed to serve a network of federated BFM nodes [Terminologies](# terminologies) and inter-connected via distributed command orchestrators (realm-ambassadors), communication between nodes is driven primarily by messages (messages-driven).
+Kermoss was designed to serve a network of federated link:#_terminologies[BFM] nodes, and inter-connected via distributed command orchestrators (realm-ambassadors), communication between nodes is driven primarily by messages (messages-driven).
 
 The (realm orchestrator) is the initiator of "global business transaction: GTX", an orchestrator of the federated network becomes ambassador after receiving a "Tag" containing GTX and can start by delegation a local transaction ( foreign local transaction: FLTX) in another BFM context, however the (realm orchestrator) is the only one responsible for rollback a (LTX: local transaction / NTLX (nested local transaction) and FLTX: foreign local transaction) via "rollback policies".
 
