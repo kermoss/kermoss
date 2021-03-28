@@ -1,5 +1,5 @@
 =  image:./images/kermoss-picto.png[width=50, role="related thumb"] Kermoss Reference Guide
-S.Raja; M.Aboullaite; M.Lahlou; K.omary; R.Mekrami
+Soufiane Raja; Mohammed Aboullaite; Mehdi Lahlou; Khalil Omary; Reda Mekrami, Amine Hakou
 :docinfo:
 :doctype: book
 :icons: font
@@ -8,7 +8,9 @@ S.Raja; M.Aboullaite; M.Lahlou; K.omary; R.Mekrami
 :sectnums:
 :sectanchors:
 :favicon:
+:linkattrs:
 :source-highlighter: rouge
+
 //:rouge-style: monokai
 //:source-highlighter: coderay
 //:source-highlighter: pygments

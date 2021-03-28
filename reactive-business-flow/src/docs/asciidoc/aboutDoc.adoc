@@ -1,1 +1,11 @@
 Welcome to the Kermoss Framework documentation site! Here you can find the reference materials, guides, and examples to write and deploy your BFM (business Flow model) using kermoss , You do not need to read this guide in a linear fashion. Each piece stands on its own, though they often refer to other pieces.
+
+= About the Framework
+
+kermoss is a lightweight and a reactive business flow for modern applications and more precisely for applications with microservice architecture. kermoss aims to be as an open specification as well an implementaion for writing and deploying long running distributed business transaction  called BFM (businness flow model), currently kermoss is under active development and written only with java but soon we will try to port the specification of kermoss to the following languages: ** kotlin, ruby, javascript, go, php, ... **.
+
+The concept of BFM is very similar to a BPM (business process management) except that the BFM are specified and developed for which it is completely reactive (responsive, elastic, resilient, message driven) for more details on the reactive architecture see the https://www.reactivemanifesto.org[the reactive manifesto, window="_blank"].
+
+If you are fun or your application follows the domain-driven design (DDD) approach, and you are looking for a framework to handle your Saga distributed transactions, then you are on the right track. kermoss aims to push your business transaction for whoever it is at the heart of your https://martinfowler.com/bliki/UbiquitousLanguage.html[Ubiquitous Language, window ="_blank"].
+
+Also software http://manifesto.softwarecraftsmanship.org[craftsmanship, window ="_blank"] is one of his first concerns via the ** process as code ** paradigm, easily integrating into your code, the BFMs will be written, tested, secured and deployed with your possible means that you master ex : Kermoss does not require you to have kafka, or docker, or to be cloud native to be reactive. you can extend the capacity and the quality of your infrastructure as you go according to your budget and your know-how.
