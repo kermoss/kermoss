@@ -1,5 +1,5 @@
 =  image:./images/kermoss-picto.png[width=50, role="related thumb"] Kermoss Reference Guide
-Soufiane Raja; Mohammed Aboullaite; Mehdi Lahlou; Khalil Omary; Reda Mekrami, Amine Hakou
+Soufiane Raja <https://ma.linkedin.com/in/architecte-technique-senior[@sraja31]>; Mohammed Aboullaite <https://ma.linkedin.com/in/aboullaite[@aboullaite]>; Mehdi Lahlou <https://ma.linkedin.com/in/mehdi-lahlou-8358337[@mlahlou]>; Khalil Omary <https://ma.linkedin.com/in/khalil-omary-63a195121[@komary]>; Reda Mkarrem <https://ma.linkedin.com/in/reda-mkarrem-4a9b37140[@rmkarrem]>; Amine Hakkou <https://uk.linkedin.com/in/aminehakkou[@mhakko]>;
 :docinfo:
 :doctype: book
 :icons: font

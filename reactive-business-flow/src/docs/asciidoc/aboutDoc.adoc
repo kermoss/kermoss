@@ -2,7 +2,7 @@ Welcome to the Kermoss Framework documentation site! Here you can find the refer
 
 = About the Framework
 
-kermoss is a lightweight and a reactive business flow for modern applications and more precisely for applications with microservice architecture. kermoss aims to be as an open specification as well an implementaion for writing and deploying long running distributed business transaction  called BFM (businness flow model), currently kermoss is under active development and written only with java but soon we will try to port the specification of kermoss to the following languages: ** kotlin, ruby, javascript, go, php, ... **.
+kermoss is a lightweight framework and a reactive business flow for modern applications and more precisely for applications with microservice architecture. kermoss aims to be as an open specification as well an implementaion for writing and deploying long running distributed business transaction  called BFM (businness flow model), currently kermoss is under active development and written only with java but soon we will try to port the specification of kermoss to the following languages: ** kotlin, ruby, javascript, go, php, ... **.
 
 The concept of BFM is very similar to a BPM (business process management) except that the BFM are specified and developed for which it is completely reactive (responsive, elastic, resilient, message driven) for more details on the reactive architecture see the https://www.reactivemanifesto.org[the reactive manifesto, window="_blank"].
 
