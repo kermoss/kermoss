@@ -9,4 +9,5 @@ extraction:
         - exclude: "**/*.js"
         - exclude: "**/*.ts"
         - exclude: "**/*.adoc"
+        - exclude: "**/*.asciidoc"
         - exclude: "**/*.html"
