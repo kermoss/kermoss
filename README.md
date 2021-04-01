@@ -4,7 +4,11 @@
 [![Build Status](https://travis-ci.org/kermoss/kermoss.svg?branch=master)](https://travis-ci.org/kermoss/kermoss)
 [![codecov](https://codecov.io/gh/kermoss/kermoss/branch/master/graph/badge.svg)](https://codecov.io/gh/kermoss/kermoss)
 ![GitHub](https://img.shields.io/github/license/kermoss/kermoss.svg)
-![Maven Central](https://img.shields.io/maven-central/v/io.kermoss/reactive-business-flow.svg) [![Total alerts](https://img.shields.io/lgtm/alerts/g/kermoss/kermoss.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/kermoss/kermoss/alerts/) [![Language grade: Java](https://img.shields.io/lgtm/grade/java/g/kermoss/kermoss.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/kermoss/kermoss/context:java)
+![Maven Central](https://img.shields.io/maven-central/v/io.kermoss/reactive-business-flow.svg)
+
+[![Total alerts](https://img.shields.io/lgtm/alerts/g/kermoss/kermoss.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/kermoss/kermoss/alerts/)
+
+[![Language grade: Java](https://img.shields.io/lgtm/grade/java/g/kermoss/kermoss.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/kermoss/kermoss/context:java)
 
 ## Problem:
   > To improve performance and consistency in a distributed environment, an application shouldn't go for ways such as two-phase commit or you'll find your self in a situation similar to the two generals problem, instead the application should strive for eventual consistency. in such a model a transactional operation is devided into multiple steps. during the execution.
