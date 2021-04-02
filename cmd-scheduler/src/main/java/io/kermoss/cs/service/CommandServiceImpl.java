@@ -23,7 +23,7 @@ public  class CommandServiceImpl implements CommandService {
     }
 
     public List<Command> findFailedCommands() {
-        final Long currentTimestamp = new Date().getTime();
+        final long currentTimestamp = new Date().getTime();
         return jdbcTemplate.query(
             "SELECT id, status FROM KERMOSS_CMD cmd WHERE cmd.status = 'FAILED' " +
                 String.format("OR (cmd.status = 'STARTED' AND (cmd.started_timestamp + %d) < %d)", maxCommandExecutionTime, currentTimestamp),

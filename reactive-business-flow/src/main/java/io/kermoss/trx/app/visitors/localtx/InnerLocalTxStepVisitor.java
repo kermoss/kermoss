@@ -87,7 +87,7 @@ public class InnerLocalTxStepVisitor extends StepLocalTxVisitor {
 
 			}
 		}
-		if (Propagation.GLOBAL.equals(compensateWhen.getPropagation())) {
+		if (compensateWhen!=null && Propagation.GLOBAL.equals(compensateWhen.getPropagation())) {
 			LOG.info("Kermoss Compensating Transaction: Global Rollback Occured ");
 			Message globalRollbackOccured = new GlobalRollbackOccured(transactionPipeline.getMeta().getChildOf());
 			blowEvent(globalRollbackOccured);
